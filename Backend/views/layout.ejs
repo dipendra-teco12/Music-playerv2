@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="/adminlte/css/adminlte.min.css" />
+    <link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css" />
+  </head>
+  <body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+      <%- include('partials/navbar') %> <%- include('partials/sidebar') %>
+
+      <div class="content-wrapper">
+        <section class="content">
+          <div class="container-fluid"><%- body %></div>
+        </section>
+      </div>
+
+      <%- include('partials/footer') %>
+    </div>
+
+    <script src="/plugins/jquery/jquery.min.js"></script>
+    <script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/adminlte/js/adminlte.min.js"></script>
+  </body>
+</html>

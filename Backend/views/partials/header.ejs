@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title><%= title || 'Admin Panel' %></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- AdminLTE & Bootstrap -->
+    <link rel="stylesheet" href="/adminlte/css/adminlte.min.css" />
+    <link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css" />
+    <link rel="stylesheet" href="/plugins/bootstrap/css/bootstrap.min.css" />
+
+    <!-- Optional: Add custom styles here -->
+  </head>
+  <body class="hold-transition sidebar-mini">
+    <div class="wrapper">
+      <!-- Navbar -->
+      <%- include('navbar') %>
+
+      <!-- Sidebar -->
+      <%- include('sidebar') %>
+
+      <!-- Content Wrapper -->
+      <div class="content-wrapper">
+        <section class="content pt-3">
+          <div class="container-fluid"></div>
+        </section>
+      </div>
+      <!-- /.content-wrapper -->
+
+      <!-- Footer -->
+      <%- include('footer') %>
+    </div>
+    <!-- /.wrapper -->
+
+    <!-- JS Scripts -->
+    <script src="/plugins/jquery/jquery.min.js"></script>
+    <script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/adminlte/js/adminlte.min.js"></script>
+  </body>
+</html>

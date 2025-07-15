@@ -1,0 +1,217 @@
+<section class="content-header">
+  <h1>Song Details</h1>
+</section>
+
+<section class="content">
+  <form action="/api/song/upload" method="POST" enctype="multipart/form-data">
+    <div class="card-body">
+      <form>
+        <div class="row">
+          <div class="col-sm-6">
+            <!-- text input -->
+            <div class="form-group">
+              <label for="title">Song title</label>
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Enter ..."
+                name="title"
+                title="title"
+                id="title"
+              />
+            </div>
+          </div>
+
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="exampleInputFile">Song image</label>
+              <div class="custom-file">
+                <input
+                  type="file"
+                  class="custom-file-input"
+                  id="exampleInputFile"
+                  name="songImage"
+                  required
+                />
+                <label class="custom-file-label" for="exampleInputFile"
+                  >Choose file</label
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-6">
+            <!-- text input -->
+            <div class="form-group">
+              <label for="artistName">Artist Name</label>
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Enter ..."
+                name="artistName"
+                id="artistName"
+              />
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="artistImage">Artist image</label>
+              <div class="custom-file">
+                <input
+                  type="file"
+                  class="custom-file-input"
+                  id="artistImage"
+                  name="artistImage"
+                  required
+                />
+                <label class="custom-file-label" for="exampleInputFile"
+                  >Choose file</label
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-6">
+            <!-- text input -->
+            <div class="form-group">
+              <label for="albumName">Album Name</label>
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Enter ..."
+                name="albumName"
+                id="albumName"
+              />
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="albumImage">Album image</label>
+              <div class="custom-file">
+                <input
+                  type="file"
+                  class="custom-file-input"
+                  id="albumImage"
+                  name="albumImage"
+                  required
+                />
+                <label class="custom-file-label" for="exampleInputFile"
+                  >Choose file</label
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-6">
+            <!-- select -->
+            <div class="form-group">
+              <label>Geners</label>
+              <select class="form-control">
+                <option>Rap Song</option>
+                <option>Pop Song</option>
+                <option>Rock Song</option>
+                <option>classsic Song</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label>Playlist</label>
+              <select class="form-control">
+                <option>Sad playlist</option>
+                <option>Chill playlist</option>
+                <option>Workout playlist</option>
+                <option>Love playlist</option>
+                <option>Happy playlist</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="Length">Audio Length</label>
+              <input
+                type="number"
+                class="form-control"
+                id="Length"
+                name="length"
+                required
+              />
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="audioFile">Audio File</label>
+              <div class="custom-file">
+                <input
+                  type="file"
+                  class="form-control"
+                  id="audioFile"
+                  name="audioFile"
+                  accept="audio/*"
+                />
+                <label class="custom-file-label" for="audioFile"
+                  >Choose file</label
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="releaseDate">Release Date</label>
+              <input
+                type="date"
+                class="form-control"
+                id="releaseDate"
+                name="releaseDate"
+              />
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="form-group">
+              <label for="videoFile">Video File</label>
+              <div class="custom-file">
+                <input
+                  type="file"
+                  class="form-control"
+                  id="videoFile"
+                  name="videoFile"
+                  accept="video/*"
+                />
+                <label class="custom-file-label" for="exampleInputFile"
+                  >Choose file</label
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-sm-6">
+            <!-- textarea -->
+            <div class="form-group">
+              <label>Description</label>
+              <textarea
+                class="form-control"
+                rows="3"
+                placeholder="Enter ..."
+              ></textarea>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Upload</button>
+      </form>
+    </div>
+  </form>
+</section>
