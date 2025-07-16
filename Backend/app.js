@@ -47,9 +47,6 @@ app.use(
 );
 
 
-
-// app.get("/dashboard", (req, res) => res.render("index"));
-
 app.get("/", (req, res) => {
   res.render("login", { layout: false });
 });
@@ -58,11 +55,11 @@ app.get("/admin", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  res.render("register", { layout: false }); // Disable default layout
+  res.render("register", { layout: false }); 
 });
 
 app.get("/forgot-password", (req, res) => {
-  res.render("forgot-password", { layout: false }); // or use layout-auth
+  res.render("forgot-password", { layout: false }); 
 });
 
 app.use("/api/auth", authRoute);

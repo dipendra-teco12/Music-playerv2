@@ -1,12 +1,14 @@
 const express = require("express");
 
 const router = express.Router();
-
-require("dotenv").config({ quiet: true });
 const passport = require("passport");
 
 const RefreshToken = require("../Models/refreshToken.Model");
-const jwt = require("jsonwebtoken");
+
+const {
+  generateAccessToken,
+  generateRefreshToken,
+} = require("../Utilities/jwt");
 
 router.get(
   "/",
@@ -20,19 +22,13 @@ router.get(
     failureRedirect: "/auth/failure",
   }),
   async (req, res) => {
-    // Issue JWT after login
-    // after passport.authenticate callback
-    const accessToken = jwt.sign(
-      { sub: req.user.id, email: req.user.email },
-      process.env.SECRET_KEY,
-      { expiresIn: "15m" }
-    );
+    const user = {
+      _id: req.user._id,
+      email: req.user.email,
+    };
+    const accessToken = generateAccessToken(user);
 
-    const refreshToken = jwt.sign(
-      { sub: req.user.id, email: req.user.email },
-      process.env.REFRESH_SECRET_KEY,
-      { expiresIn: "7d" }
-    );
+    const refreshToken = generateRefreshToken(user);
 
     // Store refresh token in DB
     await RefreshToken.create({
