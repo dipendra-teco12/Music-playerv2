@@ -47,8 +47,9 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-  res.render("login", { layout: false }); // Disable default layout
+  res.render("login", { layout: false }); 
 });
+
 
 const adminRoutes = require("./Routes/adminRoutes");
 app.use("/api/auth", authRoute);
