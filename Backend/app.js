@@ -37,19 +37,11 @@ app.use(
   )
 );
 
-require("./Public/js/Oauth");
-const session = require("express-session");
+require("./config/oauth");
 const passport = require("passport");
 const connectDB = require("./config/db");
-app.use(
-  session({
-    secret: "someSecret",
-    resave: false,
-    saveUninitialized: false,
-  })
-);
+
 app.use(passport.initialize());
-app.use(passport.session());
 
 // app.get("/dashboard", (req, res) => res.render("index"));
 
@@ -73,42 +65,63 @@ app.get(
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
+const RefreshToken = require("./Models/refreshToken.Model");
+const jwt = require("jsonwebtoken");
 // Handle Callback
 app.get(
   "/auth/google/callback",
-  passport.authenticate("google", { failureRedirect: "/auth/failure" }),
-  (req, res) => {
-    res.redirect("/dashboard");
+  passport.authenticate("google", {
+    session: false,
+    failureRedirect: "/auth/failure",
+  }),
+  async (req, res) => {
+    // Issue JWT after login
+    // after passport.authenticate callback
+    const accessToken = jwt.sign(
+      { sub: req.user.id, email: req.user.email },
+      process.env.SECRET_KEY,
+      { expiresIn: "15m" }
+    );
+
+    const refreshToken = jwt.sign(
+      { sub: req.user.id, email: req.user.email },
+      process.env.REFRESH_SECRET_KEY,
+      { expiresIn: "7d" }
+    );
+
+    // Store refresh token in DB
+    await RefreshToken.create({
+      token: refreshToken,
+      userId: req.user.id,
+      expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
+    });
+
+    // Set cookies
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "Strict",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "Strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.redirect("/admin/dashboard");
   }
 );
-
-// Protected Route
-function ensureAuth(req, res, next) {
-  req.isAuthenticated() ? next() : res.redirect("/");
-}
-app.get("/dashboard", ensureAuth, (req, res) => {
-  res.render("index");
-});
-// Failure & Logout
-app.get("/auth/failure", (req, res) => res.send("Auth Failed"));
-app.get("/logout", (req, res) => {
-  req.logout(() => {
-    req.session.destroy();
-    res.redirect("/");
-  });
-});
 
 app.use("/api/auth", authRoute);
 
 app.get("/admin/dashboard", authenticateToken, (req, res) => {
   res.render("index");
-  // res.send(
-
-  //   `<h1>Welcome ${req.user.email} </h1><a href="/api/auth/logout"> Logout </a>`
-  // );
 });
 
-app.get("/uploadsong", (req, res) => {
+app.get("/uploadsong", authenticateToken, (req, res) => {
   res.render("uploadsong", { title: "Upload Song" });
 });
 connectDB();

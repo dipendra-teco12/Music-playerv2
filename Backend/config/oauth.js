@@ -1,7 +1,7 @@
-require("dotenv").config();
+require("dotenv").config({ quiet: true });
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
-const User = require("../../Models/user.Model");
+const User = require("../Models/user.Model");
 passport.use(
   new GoogleStrategy(
     {
@@ -36,10 +36,3 @@ passport.use(
     }
   )
 );
-
-passport.serializeUser((user, done) => {
-  done(null, user);
-});
-passport.deserializeUser((obj, done) => {
-  done(null, obj);
-});
