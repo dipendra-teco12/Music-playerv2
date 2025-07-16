@@ -20,7 +20,7 @@ app.set("views", path.join(__dirname, "views"));
 
 app.use(expressLayouts);
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 app.use(passport.initialize());
@@ -46,32 +46,15 @@ app.use(
   )
 );
 
-
 app.get("/", (req, res) => {
-  res.render("login", { layout: false });
-});
-app.get("/admin", (req, res) => {
   res.render("login", { layout: false }); // Disable default layout
 });
 
-app.get("/register", (req, res) => {
-  res.render("register", { layout: false }); 
-});
-
-app.get("/forgot-password", (req, res) => {
-  res.render("forgot-password", { layout: false }); 
-});
-
+const adminRoutes = require("./Routes/adminRoutes");
 app.use("/api/auth", authRoute);
 app.use("/auth/google", oauthRoute);
+app.use("/admin", adminRoutes);
 
-app.get("/admin/dashboard", authenticateToken, (req, res) => {
-  res.render("index");
-});
-
-app.get("/uploadsong", authenticateToken, (req, res) => {
-  res.render("uploadsong", { title: "Upload Song" });
-});
 connectDB();
 
 app.listen(port, () => console.log(`Running on http://localhost:${port}`));

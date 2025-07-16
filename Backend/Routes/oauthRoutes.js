@@ -42,7 +42,7 @@ router.get(
       httpOnly: true,
       secure: false,
       sameSite: "Strict",
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {

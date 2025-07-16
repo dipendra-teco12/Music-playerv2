@@ -6,7 +6,6 @@ const jwt = require("jsonwebtoken");
 const {
   generateAccessToken,
   generateRefreshToken,
-  verifyAccessToken,
   verifyRefreshToken,
 } = require("../Utilities/jwt");
 
@@ -63,7 +62,7 @@ const login = async (req, res) => {
       httpOnly: true,
       secure: false,
       sameSite: "Strict",
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
@@ -121,7 +120,7 @@ const refreshTokenHandler = async (req, res) => {
       httpOnly: true,
       secure: false,
       sameSite: "Strict",
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 7*24 * 60 * 60 * 1000,
     });
     return res.status(200).json({ accessToken });
   } catch (err) {
@@ -154,7 +153,7 @@ const logout = async (req, res) => {
       sameSite: "Strict",
     });
 
-    return res.status(200).json({ message: "Logged out successfully" });
+    return res.redirect("/");
   } catch (error) {
     console.error("Logout error:", error);
     res.status(500).json({ message: "Internal Server Error" });
