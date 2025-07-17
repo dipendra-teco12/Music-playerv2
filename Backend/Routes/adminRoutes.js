@@ -6,10 +6,12 @@ const {
   dashboardCount,
   getAllSongs,
   deleteSong,
+  UniqueAlbums,
 } = require("../Controllers/admin.Controller");
 const authenticateToken = require("../Middlewares/authMiddleware");
 
 const { upload } = require("../config/multerConfig");
+const { unique } = require("jquery");
 
 router.post(
   "/upload",
@@ -75,5 +77,7 @@ router.get("/dashboardcount", authenticateToken, dashboardCount);
 router.get("/songs", authenticateToken, getAllSongs);
 
 router.delete("/song/:id", authenticateToken, deleteSong);
+
+router.get("/my-albums", authenticateToken, UniqueAlbums);
 
 module.exports = router;

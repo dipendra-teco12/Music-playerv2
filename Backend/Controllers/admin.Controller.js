@@ -141,11 +141,29 @@ const addAlbum = async (req, res) => {
   }
 };
 
+const UniqueAlbumsCount = async (req, res) => {
+  try {
+    const albums = await Album.find().populate("albumSong");
+
+    const uniqueAlbumsMap = {};
+    const uniqueAlbums = albums.filter((album) => {
+      if (!uniqueAlbumsMap[album.albumName]) {
+        uniqueAlbumsMap[album.albumName] = true;
+        return true;
+      }
+      return false;
+    });
+
+    return uniqueAlbums.length;
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 const dashboardCount = async (req, res) => {
   try {
     res.status(200).json({
       totalSongs: await Music.countDocuments(),
-      totalAlbums: await Album.countDocuments(),
+      totalAlbums: await UniqueAlbumsCount(),
       totalPlaylists: await Playlist.countDocuments(),
       totalArtists: await Artist.countDocuments(),
     });
@@ -212,10 +230,41 @@ const deleteSong = async (req, res) => {
   }
 };
 
+const UniqueAlbums = async (req, res) => {
+  try {
+    // Fetch all albums with their populated songs
+    const albums = await Album.find().populate("albumSong");
+
+    // Filter out unique albums by albumName
+    const uniqueAlbumsMap = {};
+    const uniqueAlbums = albums.filter((album) => {
+      if (!uniqueAlbumsMap[album.albumName]) {
+        uniqueAlbumsMap[album.albumName] = true;
+        return true;
+      }
+      return false;
+    });
+
+    // Get all album IDs for the filtered unique albums
+    const albumIds = uniqueAlbums.map((album) => album._id);
+
+    // Find all artists related to those albums
+    const relatedArtists = await Artist.find({
+      artistAlbum: { $in: albumIds },
+    });
+
+    // Return both unique albums and related artists
+    res.json({ uniqueAlbums, relatedArtists });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 module.exports = {
   uploadSong,
   addAlbum,
   dashboardCount,
   getAllSongs,
   deleteSong,
+  UniqueAlbums,
 };

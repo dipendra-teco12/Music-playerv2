@@ -1,63 +1,74 @@
-<h5 class="mb-2">Card with Image Overlay</h5>
+<style>
+  .card-img-top {
+    width: 100%;
+    height: 200px; /* Adjust height as needed */
+    object-fit: cover;
+    object-position: center;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+  }
+</style>
+
+<h5 class="mb-2">My Albums</h5>
 <div class="card card-success">
   <div class="card-body">
-    <div class="row">
-      <div class="col-md-12 col-lg-6 col-xl-4">
-        <div class="card mb-2 bg-gradient-dark">
-          <img
-            class="card-img-top"
-            src="../dist/img/photo1.png"
-            alt="Dist Photo 1"
-          />
-          <div class="card-img-overlay d-flex flex-column justify-content-end">
-            <h5 class="card-title text-primary text-white">Card Title</h5>
-            <p class="card-text text-white pb-2 pt-1">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit sed do
-              eiusmod tempor.
-            </p>
-            <a href="#" class="text-white">Last update 2 mins ago</a>
-          </div>
-        </div>
+    <a href="/admin/myAlbums/songs">
+      <div class="row" id="albumContainer">
+        <!-- Dynamic album cards will be appended here -->
       </div>
-      <div class="col-md-12 col-lg-6 col-xl-4">
-        <div class="card mb-2">
-          <img
-            class="card-img-top"
-            src="../dist/img/photo2.png"
-            alt="Dist Photo 2"
-          />
-          <div
-            class="card-img-overlay d-flex flex-column justify-content-center"
-          >
-            <h5 class="card-title text-white mt-5 pt-2">Card Title</h5>
-            <p class="card-text pb-2 pt-1 text-white">
-              Lorem ipsum dolor sit amet, <br />
-              consectetur adipisicing elit <br />
-              sed do eiusmod tempor.
-            </p>
-            <a href="#" class="text-white">Last update 15 hours ago</a>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-12 col-lg-6 col-xl-4">
-        <div class="card mb-2">
-          <img
-            class="card-img-top"
-            src="../dist/img/photo3.jpg"
-            alt="Dist Photo 3"
-          />
-          <div class="card-img-overlay">
-            <h5 class="card-title text-primary">Card Title</h5>
-            <p class="card-text pb-1 pt-1 text-white">
-              Lorem ipsum dolor <br />
-              sit amet, consectetur <br />
-              adipisicing elit sed <br />
-              do eiusmod tempor.
-            </p>
-            <a href="#" class="text-primary">Last update 3 days ago</a>
-          </div>
-        </div>
-      </div>
-    </div>
+    </a>
   </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  async function fetchAlbums() {
+    try {
+      const response = await axios.get("/admin/my-albums");
+      console.log("Fetched albums:", response.data);
+
+      const { uniqueAlbums, relatedArtists } = response.data;
+
+      // Limit to 4 albums for layout
+      const limitedAlbums = uniqueAlbums.slice(0, 4);
+
+      // Clear existing content
+      $("#albumContainer").empty();
+
+      // Loop through limited albums
+      limitedAlbums.forEach((album) => {
+        // Find the artist related to this album
+        const artist = relatedArtists.find((a) => a.artistAlbum === album._id);
+
+        const cardHTML = `
+          <div class="col-md-12 col-lg-6 col-xl-3">
+            <div class="card mb-2 bg-gradient-dark">
+              <img class="card-img-top" src="${album.albumImage}" alt="${
+          album.albumName
+        }" />
+              <div class="card-img-overlay d-flex flex-column justify-content-end">
+                <h5 class="card-title text-white">${album.albumName}</h5>
+                <p class="card-text text-white pb-2 pt-1">
+                  Artist: ${artist ? artist.artistName : "Unknown"}<br />
+               
+                </p>
+              </div>
+            </div>
+          </div>
+        `;
+
+        $("#albumContainer").append(cardHTML);
+      });
+    } catch (error) {
+      console.error("Error fetching albums:", error);
+      $("#albumContainer").html(
+        '<p class="text-danger">Failed to load albums.</p>'
+      );
+    }
+  }
+
+  // Call on page load
+  $(document).ready(() => {
+    fetchAlbums();
+  });
+</script>
