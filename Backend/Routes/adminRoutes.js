@@ -1,20 +1,37 @@
 const express = require("express");
 const router = express.Router();
-const { uploadSong, show } = require("../Controllers/admin.Controller");
+const {
+  uploadSong,
+  addAlbum,
+  dashboardCount,
+  getAllSongs,
+  deleteSong,
+} = require("../Controllers/admin.Controller");
 const authenticateToken = require("../Middlewares/authMiddleware");
 
 const { upload } = require("../config/multerConfig");
 
 router.post(
   "/upload",
+  authenticateToken,
+  upload.fields([
+    { name: "songImage", maxCount: 1 },
+    { name: "artistImage", maxCount: 1 },
+    { name: "audioFile", maxCount: 1 }, // must match!
+  ]),
+  uploadSong
+);
 
+router.post(
+  "/addAlbum",
+  authenticateToken,
   upload.fields([
     { name: "songImage", maxCount: 1 },
     { name: "artistImage", maxCount: 1 },
     { name: "albumImage", maxCount: 1 },
     { name: "audioFile", maxCount: 1 }, // must match!
   ]),
-  uploadSong
+  addAlbum
 );
 
 router.get("/", (req, res) => {
@@ -23,6 +40,10 @@ router.get("/", (req, res) => {
 
 router.get("/uploadsong", authenticateToken, (req, res) => {
   res.render("uploadsong", { title: "Upload Song" });
+});
+
+router.get("/addAlbum", authenticateToken, (req, res) => {
+  res.render("addAlbum", { title: "Upload Album" });
 });
 
 router.get("/register", (req, res) => {
@@ -36,5 +57,23 @@ router.get("/forgot-password", (req, res) => {
 router.get("/dashboard", authenticateToken, (req, res) => {
   res.render("index");
 });
+
+router.get("/mysongs", authenticateToken, (req, res) => {
+  res.render("mysongs", { title: "My Songs" });
+});
+
+router.get("/myAlbums", authenticateToken, (req, res) => {
+  res.render("myAlbums", { title: "My Albums" });
+});
+
+router.get("/myPlaylist", authenticateToken, (req, res) => {
+  res.render("myPlaylist", { title: "My Playlists" });
+});
+
+router.get("/dashboardcount", authenticateToken, dashboardCount);
+
+router.get("/songs", authenticateToken, getAllSongs);
+
+router.delete("/song/:id", authenticateToken, deleteSong);
 
 module.exports = router;

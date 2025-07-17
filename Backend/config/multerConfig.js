@@ -1,16 +1,13 @@
-
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 const cloudinary = require("./cloudinaryConfig");
 
-
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary, // Pass the configured Cloudinary instance
   params: async (req, file) => {
-
     const field = file.fieldname;
-    let folder = "MusicApp/Other"; 
+    let folder = "MusicApp/Other";
 
     // Set folder for image files
     if (
@@ -28,7 +25,6 @@ const storage = new CloudinaryStorage({
     // Return the parameters for Cloudinary upload
     return {
       folder: folder, // The Cloudinary folder to store the file
- 
 
       allowed_formats: ["jpg", "jpeg", "png", "mp3", "wav", "aac", "ogg"],
 
@@ -38,7 +34,6 @@ const storage = new CloudinaryStorage({
     };
   },
 });
-
 
 const upload = multer({
   storage: storage,

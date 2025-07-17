@@ -47,9 +47,8 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-  res.render("login", { layout: false }); 
+  res.render("login", { layout: false });
 });
-
 
 const adminRoutes = require("./Routes/adminRoutes");
 app.use("/api/auth", authRoute);
