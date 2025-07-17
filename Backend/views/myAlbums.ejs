@@ -12,11 +12,9 @@
 <h5 class="mb-2">My Albums</h5>
 <div class="card card-success">
   <div class="card-body">
-    <a href="/admin/myAlbums/songs">
-      <div class="row" id="albumContainer">
-        <!-- Dynamic album cards will be appended here -->
-      </div>
-    </a>
+    <div class="row" id="albumContainer">
+      <!-- Dynamic album cards will be appended here -->
+    </div>
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -30,32 +28,39 @@
       const { uniqueAlbums, relatedArtists } = response.data;
 
       // Limit to 4 albums for layout
-      const limitedAlbums = uniqueAlbums.slice(0, 4);
+      const limitedAlbums = uniqueAlbums;
 
       // Clear existing content
       $("#albumContainer").empty();
 
       // Loop through limited albums
       limitedAlbums.forEach((album) => {
-        // Find the artist related to this album
         const artist = relatedArtists.find((a) => a.artistAlbum === album._id);
 
+        const imageUrl = album.albumImage?.trim()
+          ? album.albumImage
+          : "https://res.cloudinary.com/dfciwmday/image/upload/v1752753992/MusicApp/defaults/songImage_scnkvu.jpg";
+
         const cardHTML = `
-          <div class="col-md-12 col-lg-6 col-xl-3">
-            <div class="card mb-2 bg-gradient-dark">
-              <img class="card-img-top" src="${album.albumImage}" alt="${
-          album.albumName
-        }" />
-              <div class="card-img-overlay d-flex flex-column justify-content-end">
-                <h5 class="card-title text-white">${album.albumName}</h5>
-                <p class="card-text text-white pb-2 pt-1">
-                  Artist: ${artist ? artist.artistName : "Unknown"}<br />
-               
-                </p>
-              </div>
-            </div>
-          </div>
-        `;
+  <div class="col-md-12 col-lg-6 col-xl-3">
+    <a href="/admin/myAlbums/songs?albumId=${
+      album._id
+    }" style="text-decoration: none;">
+      <div class="card mb-2 bg-gradient-dark">
+        <img class="card-img-top"
+             src="${imageUrl}"
+             alt="${album.albumName}"
+             onerror="this.onerror=null; this.src='https://res.cloudinary.com/dfciwmday/image/upload/v1752753992/MusicApp/defaults/songImage_scnkvu.jpg';" />
+        <div class="card-img-overlay d-flex flex-column justify-content-end">
+          <h5 class="card-title text-white">${album.albumName}</h5>
+          <p class="card-text text-white pb-2 pt-1">
+            Artist: ${artist ? artist.artistName : "Unknown"}<br />
+          </p>
+        </div>
+      </div>
+    </a>
+  </div>
+`;
 
         $("#albumContainer").append(cardHTML);
       });

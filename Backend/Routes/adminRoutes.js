@@ -72,6 +72,10 @@ router.get("/myPlaylist", authenticateToken, (req, res) => {
   res.render("myPlaylist", { title: "My Playlists" });
 });
 
+router.get("/myAlbums/songs", authenticateToken, (req, res) => {
+  res.render("myAlbumSongs", { title: "My Albums Songs" });
+});
+
 router.get("/dashboardcount", authenticateToken, dashboardCount);
 
 router.get("/songs", authenticateToken, getAllSongs);

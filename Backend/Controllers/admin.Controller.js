@@ -159,13 +159,33 @@ const UniqueAlbumsCount = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+const UniqueArtistCount = async (req, res) => {
+  try {
+    const artist = await Artist.find().populate("artistSong");
+
+    const uniqueArtistMap = {};
+    const uniqueArtist = artist.filter((artist) => {
+      if (!uniqueArtistMap[artist.artistName]) {
+        uniqueArtistMap[artist.artistName] = true;
+        return true;
+      }
+      return false;
+    });
+
+    return uniqueArtist.length;
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 const dashboardCount = async (req, res) => {
   try {
     res.status(200).json({
       totalSongs: await Music.countDocuments(),
       totalAlbums: await UniqueAlbumsCount(),
-      totalPlaylists: await Playlist.countDocuments(),
-      totalArtists: await Artist.countDocuments(),
+      totalPlaylists: 5,
+      totalArtists: await UniqueArtistCount(),
     });
   } catch {
     res.status(500).json({ message: "Internal server error" });
@@ -260,6 +280,34 @@ const UniqueAlbums = async (req, res) => {
   }
 };
 
+const albumRelatedSongs = async (req, res) => {
+  try {
+    const albumId = req.query.albumId;
+
+    if (!albumId) {
+      return res.status(400).json({ error: "albumId is required" });
+    }
+
+    // Fetch album and populate albumSong
+    const album = await Album.findById(albumId).populate("albumSong");
+
+    if (!album) {
+      return res.status(404).json({ error: "Album not found" });
+    }
+
+    // Find the artist related to this album
+    const artist = await Artist.findOne({ artistAlbum: albumId });
+
+    res.json({
+      album,
+      artist: artist || null,
+    });
+  } catch (err) {
+    console.error("Error fetching album details:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
 module.exports = {
   uploadSong,
   addAlbum,
@@ -267,4 +315,5 @@ module.exports = {
   getAllSongs,
   deleteSong,
   UniqueAlbums,
+  albumRelatedSongs,
 };
