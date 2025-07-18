@@ -50,8 +50,13 @@ const login = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "User Not Found" });
 
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(401).json({ message: "Invalid Credentials" });
+    if (user.password) {
+      const match = await bcrypt.compare(password, user.password);
+      if (!match)
+        return res.status(401).json({ message: "Invalid Credentials" });
+    } else {
+      return res.status(401).json({ message: "Invalid Credentials" });
+    }
 
     const { password: _, ...data } = user.toObject();
 
@@ -120,7 +125,7 @@ const refreshTokenHandler = async (req, res) => {
       httpOnly: true,
       secure: false,
       sameSite: "Strict",
-      maxAge: 7*24 * 60 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     return res.status(200).json({ accessToken });
   } catch (err) {
