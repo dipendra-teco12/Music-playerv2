@@ -90,10 +90,11 @@
             <td>${music.singer ?? "Unknown"}</td>
             <td>${formatLength(music.length)}</td>
             <td>
-              <button type="button" class="btn btn-block btn-danger delete-btn" data-id="${
-                music._id
-              }">
-                Delete
+             <button type="button" class="btn btn-danger delete-btn" data-id="${
+               music._id
+             }">
+                
+          <i class="fas fa-trash" aria-hidden="true"></i>
               </button>
             </td>
           </tr>
