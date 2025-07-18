@@ -305,7 +305,9 @@ const albumRelatedSongs = async (req, res) => {
 
 const UniquePlaylists = async (req, res) => {
   try {
+  
     const playlists = await Playlist.find();
+
 
     const uniqueMap = {};
     const uniquePlaylists = playlists.filter((pl) => {

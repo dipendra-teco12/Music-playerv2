@@ -25,19 +25,19 @@ router.get(
     const user = {
       _id: req.user._id,
       email: req.user.email,
+      role: req.user.role,
     };
     const accessToken = generateAccessToken(user);
 
     const refreshToken = generateRefreshToken(user);
 
-    // Store refresh token in DB
     await RefreshToken.create({
       token: refreshToken,
       userId: req.user.id,
       expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
     });
 
-    // Set cookies
+  
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: false,

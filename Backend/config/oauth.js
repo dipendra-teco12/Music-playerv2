@@ -14,10 +14,10 @@ passport.use(
       try {
         // 1. Check if the user already exists
         const email = profile.emails[0].value;
-        let user = await User.findOne({ email });
+        let user = await User.findOne({ googleId: profile.id });
 
         if (user) {
-          return done(null, user); 
+          return done(null, user);
         }
 
         // 2. If not, create a new user

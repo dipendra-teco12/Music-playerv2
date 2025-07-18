@@ -12,7 +12,7 @@ const {
   getSongsByPlaylist,
 } = require("../Controllers/admin.Controller");
 const authenticateToken = require("../Middlewares/authMiddleware");
-
+const isAdmin = require("../Middlewares/isAdmin");
 const { upload } = require("../config/multerConfig");
 
 router.post(
@@ -42,11 +42,11 @@ router.get("/", (req, res) => {
   res.render("login", { layout: false }); // Disable default layout
 });
 
-router.get("/uploadsong", authenticateToken, (req, res) => {
+router.get("/uploadsong", authenticateToken,isAdmin, (req, res) => {
   res.render("uploadsong", { title: "Upload Song", activePage: "uploadsong" });
 });
 
-router.get("/addAlbum", authenticateToken, (req, res) => {
+router.get("/addAlbum", authenticateToken,isAdmin, (req, res) => {
   res.render("addAlbum", { title: "Upload Album", activePage: "addAlbum" });
 });
 
@@ -58,30 +58,30 @@ router.get("/forgot-password", (req, res) => {
   res.render("forgot-password", { layout: false });
 });
 
-router.get("/dashboard", authenticateToken, (req, res) => {
+router.get("/dashboard", authenticateToken,isAdmin, (req, res) => {
   res.render("index", { activePage: "dashboard", title: "Dashboard" });
 });
 
-router.get("/mysongs", authenticateToken, (req, res) => {
+router.get("/mysongs", authenticateToken,isAdmin ,(req, res) => {
   res.render("mysongs", { title: "My Songs", activePage: "mysongs" });
 });
 
-router.get("/myAlbums", authenticateToken, (req, res) => {
+router.get("/myAlbums", authenticateToken,isAdmin ,(req, res) => {
   res.render("myAlbums", { title: "My Albums", activePage: "myAlbums" });
 });
 
-router.get("/myPlaylist", authenticateToken, (req, res) => {
+router.get("/myPlaylist", authenticateToken,isAdmin,(req, res) => {
   res.render("myPlaylist", { title: "My Playlists", activePage: "myPlaylist" });
 });
 
-router.get("/myAlbums/songs", authenticateToken, (req, res) => {
+router.get("/myAlbums/songs", authenticateToken,isAdmin ,(req, res) => {
   res.render("myAlbumSongs", {
     title: "My Albums Songs",
     activePage: "myAlbums",
   });
 });
 
-router.get("/myPlaylists/songs", authenticateToken, (req, res) => {
+router.get("/myPlaylists/songs", authenticateToken,isAdmin, (req, res) => {
   res.render("myPlaylistSongs", {
     title: "My Playlist Songs",
     activePage: "myPlaylist",

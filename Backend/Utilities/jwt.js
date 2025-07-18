@@ -4,7 +4,7 @@ require("dotenv").config({ quiet: true });
 const generateAccessToken = (user) => {
   try {
     return jwt.sign(
-      { id: user._id, email: user.email },
+      { id: user._id, email: user.email,role: user.role },
       process.env.SECRET_KEY,
       { expiresIn: "7d" }
     );
@@ -17,7 +17,7 @@ const generateAccessToken = (user) => {
 const generateRefreshToken = (user) => {
   try {
     return jwt.sign(
-      { id: user._id, email: user.email },
+      { id: user._id, email: user.email, role: user.role },
       process.env.REFRESH_SECRET_KEY,
       { expiresIn: "7d" }
     );
