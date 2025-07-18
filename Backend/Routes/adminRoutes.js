@@ -34,7 +34,7 @@ router.post(
     { name: "songImage", maxCount: 1 },
     { name: "artistImage", maxCount: 1 },
     { name: "albumImage", maxCount: 1 },
-    { name: "audioFile", maxCount: 1 }, // must match!
+    { name: "audioFile", maxCount: 1 }, 
   ]),
   addAlbum
 );

@@ -48,7 +48,7 @@ const login = async (req, res) => {
     }
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User Not Found" });
+    if (!user) return res.status(404).json({ message: "User Don't Exits" });
 
     if (user.password) {
       const match = await bcrypt.compare(password, user.password);
