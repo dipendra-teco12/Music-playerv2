@@ -308,6 +308,57 @@ const albumRelatedSongs = async (req, res) => {
   }
 };
 
+const UniquePlaylists = async (req, res) => {
+  try {
+    // 1. Get all playlists + songs
+    const playlists = await Playlist.find().populate("playlistSong");
+
+    // 2. Filter unique by title
+    const uniqueMap = {};
+    const uniquePlaylists = playlists.filter((pl) => {
+      if (!uniqueMap[pl.playlistName]) {
+        uniqueMap[pl.playlistName] = true;
+        return true;
+      }
+      return false;
+    });
+
+    // 5. Return JSON
+    res.json({ uniquePlaylists });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+const getSongsByAlbum = async (req, res) => {
+  try {
+    const { albumId } = req.query;
+    if (!albumId) {
+      return res.status(400).json({ error: "albumId query is required" });
+    }
+
+    const album = await Album.findById(albumId).populate({
+      path: "albumSong",
+    });
+
+    const artist = await Artist.findOne({ artistAlbum: albumId });
+
+    if (!album) {
+      return res.status(404).json({ error: "Album not found" });
+    }
+
+    res.json({
+      albumName: album.albumName,
+      songs: album.albumSong,
+      artistName: artist ? artist.artistName : "Unknown Artist",
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+module.exports = { getSongsByAlbum };
+
 module.exports = {
   uploadSong,
   addAlbum,
@@ -316,4 +367,6 @@ module.exports = {
   deleteSong,
   UniqueAlbums,
   albumRelatedSongs,
+  UniquePlaylists,
+  getSongsByAlbum,
 };

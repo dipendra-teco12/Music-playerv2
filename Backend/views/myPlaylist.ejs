@@ -1,0 +1,76 @@
+<style>
+  .card-img-top {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    object-position: center;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+  }
+</style>
+
+<h5 class="mb-2">My Playlists</h5>
+<div class="card card-success">
+  <div class="card-body">
+    <div class="row" id="playlistContainer">
+      <!-- Dynamic playlist cards will be appended here -->
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  async function fetchPlaylists() {
+    try {
+      const response = await axios.get("/admin/my-playlists");
+      console.log("Fetched playlists:", response.data);
+
+      const { uniquePlaylists } = response.data; // Fixed typo
+
+      // Clear any existing cards
+      $("#playlistContainer").empty();
+
+      uniquePlaylists.forEach((playlist) => {
+        // If you don't have relatedArtists in the API, remove the artist logic or fetch separately
+        const imageUrl = playlist.coverImage?.trim()
+          ? playlist.coverImage
+          : "https://res.cloudinary.com/dfciwmday/image/upload/v1752753992/MusicApp/defaults/songImage_scnkvu.jpg";
+
+        const cardHTML = `
+          <div class="col-md-12 col-lg-6 col-xl-3">
+            <a href="/admin/myPlaylists/songs?playlistId=${playlist._id}"
+               style="text-decoration: none;">
+              <div class="card mb-2 bg-gradient-dark">
+                <img class="card-img-top"
+                     src="${imageUrl}"
+                     alt="${playlist.playlistName} cover image"
+                     onerror="this.onerror=null; this.src='https://example.com/defaultPlaylistImage.jpg';" />
+                <div class="card-img-overlay d-flex flex-column justify-content-end">
+                  <h5 class="card-title text-white">${playlist.playlistName}</h5>
+                
+                </div>
+              </div>
+            </a>
+          </div>
+        `;
+
+        $("#playlistContainer").append(cardHTML);
+      });
+
+      // Optionally show a message if nothing to display
+      if (!uniquePlaylists.length) {
+        $("#playlistContainer").html(
+          '<p class="text-muted">No playlists found.</p>'
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching playlists:", error);
+      $("#playlistContainer").html(
+        '<p class="text-danger">Failed to load playlists.</p>'
+      );
+    }
+  }
+
+  $(document).ready(fetchPlaylists);
+</script>

@@ -7,11 +7,12 @@ const {
   getAllSongs,
   deleteSong,
   UniqueAlbums,
+  UniquePlaylists,
+  getSongsByAlbum,
 } = require("../Controllers/admin.Controller");
 const authenticateToken = require("../Middlewares/authMiddleware");
 
 const { upload } = require("../config/multerConfig");
-const { unique } = require("jquery");
 
 router.post(
   "/upload",
@@ -86,5 +87,9 @@ router.get("/songs", authenticateToken, getAllSongs);
 router.delete("/song/:id", authenticateToken, deleteSong);
 
 router.get("/my-albums", authenticateToken, UniqueAlbums);
+
+router.get("/my-playlists", authenticateToken, UniquePlaylists);
+
+router.get("/api/myAlbums/songs", authenticateToken, getSongsByAlbum);
 
 module.exports = router;

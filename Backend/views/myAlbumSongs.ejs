@@ -1,134 +1,93 @@
-<div class="content-header">
-  <div class="container-fluid">
-    <div class="row mb-2">
-      <div class="col-sm-6">
-        <h1 class="m-0">My Songs</h1>
-      </div>
-      <div class="col-sm-6">
-        <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item"><a href="/admin/dashboard">Home</a></li>
-          <li class="breadcrumb-item active">Dashboard</li>
-        </ol>
-      </div>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">All Songs</h3>
-
-          <div class="card-tools">
-            <div class="input-group input-group-sm" style="width: 150px">
-              <input
-                type="text"
-                name="table_search"
-                class="form-control float-right"
-                placeholder="Search"
-              />
-
-              <div class="input-group-append">
-                <button type="submit" class="btn btn-default">
-                  <i class="fas fa-search"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- /.card-header -->
-        <div class="card-body table-responsive p-0">
-          <table class="table table-hover text-nowrap">
-            <thead>
-              <tr>
-                <th>Song title</th>
-                <th>Release Date</th>
-                <th>Likes</th>
-                <th>Singer</th>
-                <th>Length</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="music-table-body">
-              <!-- Rows will be injected here using jQuery -->
-            </tbody>
-          </table>
-        </div>
-        <!-- /.card-body -->
-      </div>
-      <!-- /.card -->
-    </div>
-  </div>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <script>
-    function formatLength(seconds) {
-      if (!seconds || isNaN(seconds)) return "N/A";
-      const mins = Math.floor(seconds / 60);
-      const secs = String(seconds % 60).padStart(2, "0");
-      return `${mins}:${secs}`;
-    }
-
-    function fetchAllMusics() {
-      axios
-        .get("/admin/songs")
-        .then((response) => {
-          const musicData = response.data;
-          const $tbody = $("#music-table-body");
-          $tbody.empty();
-
-          musicData.forEach((music) => {
-            const releaseDate = music.releaseDate
-              ? music.releaseDate.split("T")[0]
-              : "N/A";
-
-            const row = `
-          <tr>
-            <td>${music.title}</td>
-            <td>${releaseDate}</td>
-            <td><span class="tag tag-success">${music.views ?? 0}</span></td>
-            <td>${music.singer ?? "Unknown"}</td>
-            <td>${formatLength(music.length)}</td>
-            <td>
-             <button type="button" class="btn btn-danger delete-btn" data-id="${
-               music._id
-             }">
-                
-          <i class="fas fa-trash" aria-hidden="true"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-            $tbody.append(row);
-          });
-        })
-        .catch((error) => {
-          console.error("❌ Failed to fetch musics:", error);
-        });
-    }
-
-    // Delete music
-    function deleteMusic(id) {
-      if (!confirm("Are you sure you want to delete this song?")) return;
-
-      axios
-        .delete(`/admin/song/${id}`)
-        .then(() => {
-          fetchAllMusics();
-        })
-        .catch((error) => {
-          console.error("❌ Delete failed:", error);
-          alert("Delete failed. See console for details.");
-        });
-    }
-
-    // Attach handler on dynamically generated buttons
-    $(document).on("click", ".delete-btn", function () {
-      const id = $(this).data("id");
-      deleteMusic(id);
-    });
-
-    // Load music data on page load
-    $(document).ready(fetchAllMusics);
-  </script>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 id="album-title" class="mb-0">Album title here</h3>
+  <a href="/admin/myAlbums" class="btn btn-primary mt-2">← Back to Albums</a>
 </div>
+<div class="card">
+  <div class="card-body table-responsive p-0">
+    <table class="table table-hover text-nowrap">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Release Date</th>
+          <th>Likes</th>
+          <th>Singer</th>
+          <th>Length</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="music-table-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+  function formatLength(sec) {
+    if (!sec || isNaN(sec)) return "N/A";
+    const m = Math.floor(sec / 60),
+      s = ("0" + (sec % 60)).slice(-2);
+    return `${m}:${s}`;
+  }
+
+  $(async function () {
+    const albumId = new URLSearchParams(window.location.search).get("albumId");
+    if (!albumId) {
+      $("#music-table-body").html(
+        '<tr><td colspan="6">Album ID is missing.</td></tr>'
+      );
+      return;
+    }
+
+    try {
+      const { data } = await axios.get(
+        `/admin/api/myAlbums/songs?albumId=${albumId}`
+      );
+      $("#album-title").text("Album: " + data.albumName);
+
+      const $tbody = $("#music-table-body").empty();
+      const songs = data.songs || [];
+      const artist = data.artistName;
+
+      if (!songs.length) {
+        return $tbody.html(
+          '<tr><td colspan="6">No songs found for this album.</td></tr>'
+        );
+      }
+
+      songs.forEach((song) => {
+        const date = song.releaseDate ? song.releaseDate.split("T")[0] : "N/A";
+        const row = `
+            <tr>
+              <td>${song.title}</td>
+              <td>${date}</td>
+              <td><span class="tag tag-success">${song.views ?? 0}</span></td>
+              <td>${song.artistName ?? "Unknown"}</td>
+              <td>${formatLength(song.length)}</td>
+              <td>
+                <button class="btn btn-danger delete-btn" data-id="${song._id}">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>`;
+        $tbody.append(row);
+      });
+    } catch (err) {
+      console.error(err);
+      $("#music-table-body").html(
+        '<tr><td colspan="6" class="text-danger">Failed to load songs.</td></tr>'
+      );
+    }
+  });
+
+  $(document).on("click", ".delete-btn", async function () {
+    if (!confirm("Do you want to delete this song?")) return;
+    const id = $(this).data("id");
+    try {
+      await axios.delete(`/admin/song/${id}`);
+      window.location.reload();
+    } catch {
+      alert("Delete failed.");
+    }
+  });
+</script>
