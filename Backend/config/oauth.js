@@ -25,11 +25,11 @@ passport.use(
           googleId: profile.id,
           fullName: profile.displayName,
           email: profile.emails[0].value,
-          role: "user", // or "admin" if you're setting manually
+          role: "user", 
         });
 
         await user.save();
-        return done(null, user); // Pass the new user to Passport
+        return done(null, user); 
       } catch (err) {
         return done(err, null);
       }

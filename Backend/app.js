@@ -11,7 +11,7 @@ require("./config/oauth");
 const cookieParser = require("cookie-parser");
 const authRoute = require("./Routes/authRoutes");
 const oauthRoute = require("./Routes/oauthRoutes");
-const authenticateToken = require("./Middlewares/authMiddleware");
+const adminRoutes = require("./Routes/adminRoutes");
 const port = process.env.PORT || 4000;
 
 app.set("layout", "layout");
@@ -47,10 +47,8 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-  res.render("login", { layout: false });
+  res.render("authViews/login", { layout: false });
 });
-
-const adminRoutes = require("./Routes/adminRoutes");
 app.use("/api/auth", authRoute);
 app.use("/auth/google", oauthRoute);
 app.use("/admin", adminRoutes);

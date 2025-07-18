@@ -13,7 +13,6 @@ const authenticateToken = async (req, res, next) => {
     }
 
     const decoded = verifyAccessToken(token);
-    console.log("Decoded Token:", decoded);
     req.user = decoded;
 
     next();
