@@ -10,7 +10,7 @@
           <th>Title</th>
           <th>Release Date</th>
           <th>Likes</th>
-          <th>Singer</th>
+          <th>Genre</th>
           <th>Length</th>
           <th>Action</th>
         </tr>
@@ -62,7 +62,7 @@
               <td>${song.title}</td>
               <td>${date}</td>
               <td><span class="tag tag-success">${song.views ?? 0}</span></td>
-              <td>${song.artistName ?? "Unknown"}</td>
+              <td>${song.genre ?? "Unknown"}</td>
               <td>${formatLength(song.length)}</td>
               <td>
                 <button class="btn btn-danger delete-btn" data-id="${song._id}">
