@@ -46,7 +46,7 @@
           <p>Playlist</p>
         </div>
         <div class="icon"><i class="ion ion-person-add"></i></div>
-        <a href="#" class="small-box-footer"
+        <a href="/admin/myPlaylist" class="small-box-footer"
           >More info <i class="fas fa-arrow-circle-right"></i
         ></a>
       </div>
@@ -170,10 +170,12 @@
             <td>${music.singer ?? "Unknown"}</td>
             <td>${formatLength(music.length)}</td>
             <td>
-              <button type="button" class="btn btn-block btn-danger delete-btn" data-id="${
+              <button type="button" class="btn btn-danger delete-btn" data-id="${
                 music._id
               }">
-                Delete
+                
+          <i class="fas fa-trash" aria-hidden="true"></i>
+
               </button>
             </td>
           </tr>

@@ -226,7 +226,6 @@ const forgetPassword = async (req, res) => {
 const verifyOtp = async (req, res) => {
   try {
     const { otp, email } = req.body;
-    console.log(otp, email);
     const user = await User.findOne({
       email,
       resetOtp: otp,

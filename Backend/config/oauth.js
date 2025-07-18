@@ -17,7 +17,7 @@ passport.use(
         let user = await User.findOne({ email });
 
         if (user) {
-          return done(null, user); // Already exists
+          return done(null, user); 
         }
 
         // 2. If not, create a new user

@@ -9,6 +9,7 @@ const {
   UniqueAlbums,
   UniquePlaylists,
   getSongsByAlbum,
+  getSongsByPlaylist,
 } = require("../Controllers/admin.Controller");
 const authenticateToken = require("../Middlewares/authMiddleware");
 
@@ -76,7 +77,14 @@ router.get("/myPlaylist", authenticateToken, (req, res) => {
 router.get("/myAlbums/songs", authenticateToken, (req, res) => {
   res.render("myAlbumSongs", {
     title: "My Albums Songs",
-    activePage: "myAlbumSongs",
+    activePage: "myAlbums",
+  });
+});
+
+router.get("/myPlaylists/songs", authenticateToken, (req, res) => {
+  res.render("myPlaylistSongs", {
+    title: "My Playlist Songs",
+    activePage: "myPlaylist",
   });
 });
 
@@ -91,5 +99,6 @@ router.get("/my-albums", authenticateToken, UniqueAlbums);
 router.get("/my-playlists", authenticateToken, UniquePlaylists);
 
 router.get("/api/myAlbums/songs", authenticateToken, getSongsByAlbum);
+router.get("/api/myPlaylists/songs", authenticateToken, getSongsByPlaylist);
 
 module.exports = router;

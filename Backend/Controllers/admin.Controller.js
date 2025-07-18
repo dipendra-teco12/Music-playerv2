@@ -10,6 +10,14 @@ const DEFAULT_ARTIST_IMAGE =
 const DEFAULT_ALBUM_IMAGE =
   "https://res.cloudinary.com/dfciwmday/image/upload/v1752668322/MusicApp/Images/albumImage_quzow6.jpg";
 
+async function addSongToPlaylist(playlistName, songId) {
+  return Playlist.findOneAndUpdate(
+    { playlistName },
+    { $addToSet: { playlistSong: songId } },
+    { upsert: true, new: true }
+  );
+}
+
 const uploadSong = async (req, res) => {
   try {
     const {
@@ -57,11 +65,7 @@ const uploadSong = async (req, res) => {
       });
     }
 
-    await Playlist.create({
-      playlistName: playlist,
-      playlistSong: songdata._id,
-    });
-
+    await addSongToPlaylist(playlist, songdata._id);
     return res.status(200).json({
       message: "Song uploaded successfully",
       songdata,
@@ -126,10 +130,7 @@ const addAlbum = async (req, res) => {
       artistAlbum: albumdata._id,
     });
 
-    await Playlist.create({
-      playlistName: playlist,
-      playlistSong: songdata._id,
-    });
+    await addSongToPlaylist(playlist, songdata._id);
 
     return res.status(200).json({
       message: "album uploaded successfully",
@@ -143,7 +144,7 @@ const addAlbum = async (req, res) => {
 
 const UniqueAlbumsCount = async (req, res) => {
   try {
-    const albums = await Album.find().populate("albumSong");
+    const albums = await Album.find().lean();
 
     const uniqueAlbumsMap = {};
     const uniqueAlbums = albums.filter((album) => {
@@ -162,7 +163,7 @@ const UniqueAlbumsCount = async (req, res) => {
 
 const UniqueArtistCount = async (req, res) => {
   try {
-    const artist = await Artist.find().populate("artistSong");
+    const artist = await Artist.find().lean();
 
     const uniqueArtistMap = {};
     const uniqueArtist = artist.filter((artist) => {
@@ -196,7 +197,6 @@ const getAllSongs = async (req, res) => {
   try {
     const musics = await Music.find().lean();
 
-    // Optionally populate artistName based on artistSong field
     const artists = await Artist.find().lean();
 
     const enriched = musics.map((music) => {
@@ -252,10 +252,8 @@ const deleteSong = async (req, res) => {
 
 const UniqueAlbums = async (req, res) => {
   try {
-    // Fetch all albums with their populated songs
-    const albums = await Album.find().populate("albumSong");
+    const albums = await Album.find();
 
-    // Filter out unique albums by albumName
     const uniqueAlbumsMap = {};
     const uniqueAlbums = albums.filter((album) => {
       if (!uniqueAlbumsMap[album.albumName]) {
@@ -265,15 +263,12 @@ const UniqueAlbums = async (req, res) => {
       return false;
     });
 
-    // Get all album IDs for the filtered unique albums
     const albumIds = uniqueAlbums.map((album) => album._id);
 
-    // Find all artists related to those albums
     const relatedArtists = await Artist.find({
       artistAlbum: { $in: albumIds },
     });
 
-    // Return both unique albums and related artists
     res.json({ uniqueAlbums, relatedArtists });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -310,10 +305,8 @@ const albumRelatedSongs = async (req, res) => {
 
 const UniquePlaylists = async (req, res) => {
   try {
-    // 1. Get all playlists + songs
-    const playlists = await Playlist.find().populate("playlistSong");
+    const playlists = await Playlist.find();
 
-    // 2. Filter unique by title
     const uniqueMap = {};
     const uniquePlaylists = playlists.filter((pl) => {
       if (!uniqueMap[pl.playlistName]) {
@@ -323,7 +316,6 @@ const UniquePlaylists = async (req, res) => {
       return false;
     });
 
-    // 5. Return JSON
     res.json({ uniquePlaylists });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -357,7 +349,32 @@ const getSongsByAlbum = async (req, res) => {
   }
 };
 
-module.exports = { getSongsByAlbum };
+const getSongsByPlaylist = async (req, res) => {
+  try {
+    const { playlistId } = req.query;
+    if (!playlistId) {
+      return res.status(400).json({ error: "playlistId is required" });
+    }
+
+    // Populate the correct field: playlistSong
+    const playlist = await Playlist.findById(playlistId).populate({
+      path: "playlistSong",
+      options: { sort: { releaseDate: -1 } },
+    });
+
+    if (!playlist) {
+      return res.status(404).json({ error: "Playlist not found" });
+    }
+
+    // Playlist.title may not exist; likely it's playlist.playlistName
+    res.json({
+      title: playlist.playlistName,
+      songs: playlist.playlistSong,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 module.exports = {
   uploadSong,
@@ -369,4 +386,5 @@ module.exports = {
   albumRelatedSongs,
   UniquePlaylists,
   getSongsByAlbum,
+  getSongsByPlaylist,
 };
