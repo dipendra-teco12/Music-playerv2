@@ -1,5 +1,6 @@
+<!-- views/partials/sidebar.ejs -->
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
-  <a href="/admin/dashboard" class="brand-link" style="text-align: center">
+  <a href="/admin/dashboard" class="brand-link text-center">
     <span class="brand-text font-weight-light">Music Player</span>
   </a>
 
@@ -11,44 +12,62 @@
         role="menu"
       >
         <li class="nav-item">
-          <a href="/admin/dashboard" class="nav-link active">
+          <a
+            href="/admin/dashboard"
+            class="nav-link <%= activePage === 'dashboard' ? 'active' : '' %>"
+          >
             <i class="nav-icon fas fa-tachometer-alt"></i>
             <p>Dashboard</p>
           </a>
         </li>
 
         <li class="nav-item">
-          <a href="/admin/uploadsong" class="nav-link">
-            <i class="nav-icon fas fa-music"></i>
+          <a
+            href="/admin/uploadsong"
+            class="nav-link <%= activePage === 'uploadsong' ? 'active' : '' %>"
+          >
+            <i class="nav-icon fas fa-cloud-upload-alt"></i>
             <p>Upload Song</p>
           </a>
         </li>
 
         <li class="nav-item">
-          <a href="/admin/addAlbum" class="nav-link">
-            <i class="nav-icon fas fa-music"></i>
+          <a
+            href="/admin/addAlbum"
+            class="nav-link <%= activePage === 'addAlbum' ? 'active' : '' %>"
+          >
+            <i class="nav-icon fas fa-plus-circle"></i>
             <p>Add Album</p>
           </a>
         </li>
 
         <li class="nav-item">
-          <a href="/admin/mysongs" class="nav-link">
+          <a
+            href="/admin/mysongs"
+            class="nav-link <%= activePage === 'mysongs' ? 'active' : '' %>"
+          >
             <i class="nav-icon fas fa-music"></i>
             <p>My Songs</p>
           </a>
         </li>
 
         <li class="nav-item">
-          <a href="/admin/myAlbums" class="nav-link">
-            <i class="nav-icon fas fa-music"></i>
+          <a
+            href="/admin/myAlbums"
+            class="nav-link <%= activePage === 'myAlbums' ? 'active' : '' %>"
+          >
+            <i class="nav-icon fas fa-compact-disc"></i>
             <p>My Albums</p>
           </a>
         </li>
 
         <li class="nav-item">
-          <a href="/admin/myPlaylist" class="nav-link">
-            <i class="nav-icon fas fa-music"></i>
-            <p>My playlist</p>
+          <a
+            href="/admin/myPlaylist"
+            class="nav-link <%= activePage === 'myPlaylist' ? 'active' : '' %>"
+          >
+            <i class="nav-icon fas fa-heart"></i>
+            <p>My Playlist</p>
           </a>
         </li>
 

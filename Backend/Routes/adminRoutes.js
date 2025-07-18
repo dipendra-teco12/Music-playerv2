@@ -41,11 +41,11 @@ router.get("/", (req, res) => {
 });
 
 router.get("/uploadsong", authenticateToken, (req, res) => {
-  res.render("uploadsong", { title: "Upload Song" });
+  res.render("uploadsong", { title: "Upload Song", activePage: "uploadsong" });
 });
 
 router.get("/addAlbum", authenticateToken, (req, res) => {
-  res.render("addAlbum", { title: "Upload Album" });
+  res.render("addAlbum", { title: "Upload Album", activePage: "addAlbum" });
 });
 
 router.get("/register", (req, res) => {
@@ -57,23 +57,26 @@ router.get("/forgot-password", (req, res) => {
 });
 
 router.get("/dashboard", authenticateToken, (req, res) => {
-  res.render("index");
+  res.render("index", { activePage: "dashboard", title: "Dashboard" });
 });
 
 router.get("/mysongs", authenticateToken, (req, res) => {
-  res.render("mysongs", { title: "My Songs" });
+  res.render("mysongs", { title: "My Songs", activePage: "mysongs" });
 });
 
 router.get("/myAlbums", authenticateToken, (req, res) => {
-  res.render("myAlbums", { title: "My Albums" });
+  res.render("myAlbums", { title: "My Albums", activePage: "myAlbums" });
 });
 
 router.get("/myPlaylist", authenticateToken, (req, res) => {
-  res.render("myPlaylist", { title: "My Playlists" });
+  res.render("myPlaylist", { title: "My Playlists", activePage: "myPlaylist" });
 });
 
 router.get("/myAlbums/songs", authenticateToken, (req, res) => {
-  res.render("myAlbumSongs", { title: "My Albums Songs" });
+  res.render("myAlbumSongs", {
+    title: "My Albums Songs",
+    activePage: "myAlbumSongs",
+  });
 });
 
 router.get("/dashboardcount", authenticateToken, dashboardCount);
