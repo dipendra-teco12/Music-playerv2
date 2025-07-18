@@ -1,63 +1,81 @@
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h3 id="album-title" class="mb-0">Album title here</h3>
-  <a href="/admin/myAlbums" class="btn btn-primary mt-2">← Back to Albums</a>
-</div>
-<div class="card">
-  <div class="card-body table-responsive p-0">
-    <table class="table table-hover text-nowrap">
-      <thead>
-        <tr>
-          <th>Title</th>
-          <th>Release Date</th>
-          <th>Likes</th>
-          <th>Genre</th>
-          <th>Length</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="music-table-body"></tbody>
-    </table>
+<div class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h3 id="album-title" class="mb-2">Album title here</h3>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item">
+            <a href="/admin/myAlbums">My Albums</a>
+          </li>
+          <li class="breadcrumb-item"><a href="/admin/dashboard">Home</a></li>
+          <li class="breadcrumb-item active">Dashboard</li>
+        </ol>
+      </div>
+    </div>
   </div>
-</div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script>
-  function formatLength(sec) {
-    if (!sec || isNaN(sec)) return "N/A";
-    const m = Math.floor(sec / 60),
-      s = ("0" + (sec % 60)).slice(-2);
-    return `${m}:${s}`;
-  }
+  <div class="card">
+    <div class="card-body table-responsive p-0">
+      <table class="table table-hover text-nowrap">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Release Date</th>
+            <th>Likes</th>
+            <th>Genre</th>
+            <th>Length</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="music-table-body"></tbody>
+      </table>
+    </div>
+  </div>
 
-  $(async function () {
-    const albumId = new URLSearchParams(window.location.search).get("albumId");
-    if (!albumId) {
-      $("#music-table-body").html(
-        '<tr><td colspan="6">Album ID is missing.</td></tr>'
-      );
-      return;
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    function formatLength(sec) {
+      if (!sec || isNaN(sec)) return "N/A";
+      const m = Math.floor(sec / 60),
+        s = ("0" + (sec % 60)).slice(-2);
+      return `${m}:${s}`;
     }
 
-    try {
-      const { data } = await axios.get(
-        `/admin/api/myAlbums/songs?albumId=${albumId}`
+    $(async function () {
+      const albumId = new URLSearchParams(window.location.search).get(
+        "albumId"
       );
-      $("#album-title").text("Album: " + data.albumName);
-
-      const $tbody = $("#music-table-body").empty();
-      const songs = data.songs || [];
-      const artist = data.artistName;
-
-      if (!songs.length) {
-        return $tbody.html(
-          '<tr><td colspan="6">No songs found for this album.</td></tr>'
+      if (!albumId) {
+        $("#music-table-body").html(
+          '<tr><td colspan="6">Album ID is missing.</td></tr>'
         );
+        return;
       }
 
-      songs.forEach((song) => {
-        const date = song.releaseDate ? song.releaseDate.split("T")[0] : "N/A";
-        const row = `
+      try {
+        const { data } = await axios.get(
+          `/admin/api/myAlbums/songs?albumId=${albumId}`
+        );
+        $("#album-title").text("Album: " + data.albumName);
+
+        const $tbody = $("#music-table-body").empty();
+        const songs = data.songs || [];
+        const artist = data.artistName;
+
+        if (!songs.length) {
+          return $tbody.html(
+            '<tr><td colspan="6">No songs found for this album.</td></tr>'
+          );
+        }
+
+        songs.forEach((song) => {
+          const date = song.releaseDate
+            ? song.releaseDate.split("T")[0]
+            : "N/A";
+          const row = `
             <tr>
               <td>${song.title}</td>
               <td>${date}</td>
@@ -70,24 +88,25 @@
                 </button>
               </td>
             </tr>`;
-        $tbody.append(row);
-      });
-    } catch (err) {
-      console.error(err);
-      $("#music-table-body").html(
-        '<tr><td colspan="6" class="text-danger">Failed to load songs.</td></tr>'
-      );
-    }
-  });
+          $tbody.append(row);
+        });
+      } catch (err) {
+        console.error(err);
+        $("#music-table-body").html(
+          '<tr><td colspan="6" class="text-danger">Failed to load songs.</td></tr>'
+        );
+      }
+    });
 
-  $(document).on("click", ".delete-btn", async function () {
-    if (!confirm("Do you want to delete this song?")) return;
-    const id = $(this).data("id");
-    try {
-      await axios.delete(`/admin/song/${id}`);
-      window.location.reload();
-    } catch {
-      alert("Delete failed.");
-    }
-  });
-</script>
+    $(document).on("click", ".delete-btn", async function () {
+      if (!confirm("Do you want to delete this song?")) return;
+      const id = $(this).data("id");
+      try {
+        await axios.delete(`/admin/song/${id}`);
+        window.location.reload();
+      } catch {
+        alert("Delete failed.");
+      }
+    });
+  </script>
+</div>

@@ -52,31 +52,31 @@ router.get("/forgot-password", (req, res) => {
 });
 
 router.get("/uploadsong", authenticateToken, isAdmin, (req, res) => {
-  res.render("uploadsong", { title: "Upload Song", activePage: "uploadsong" });
+  res.render("uploadsong", { activePage: "uploadsong" });
 });
 
 router.get("/addAlbum", authenticateToken, isAdmin, (req, res) => {
-  res.render("addAlbum", { title: "Upload Album", activePage: "addAlbum" });
+  res.render("addAlbum", { activePage: "addAlbum" });
 });
 
 router.get("/dashboard", authenticateToken, isAdmin, (req, res) => {
-  res.render("index", { activePage: "dashboard", title: "Dashboard" });
+  res.render("index", { activePage: "dashboard" });
 });
 
 router.get("/mysongs", authenticateToken, isAdmin, (req, res) => {
-  res.render("mysongs", { title: "My Songs", activePage: "mysongs" });
+  res.render("mysongs", { activePage: "mysongs" });
 });
 
 router.get("/myAlbums", authenticateToken, isAdmin, (req, res) => {
-  res.render("myAlbums", { title: "My Albums", activePage: "myAlbums" });
+  res.render("myAlbums", { activePage: "myAlbums" });
 });
 
 router.get("/myPlaylist", authenticateToken, isAdmin, (req, res) => {
-  res.render("myPlaylist", { title: "My Playlists", activePage: "myPlaylist" });
+  res.render("myPlaylist", { activePage: "myPlaylist" });
 });
 
 router.get("/artist", authenticateToken, isAdmin, (req, res) => {
-  res.render("artist", { title: "artist", activePage: "artist" });
+  res.render("artist", { activePage: "artist" });
 });
 
 router.get("/myAlbums/songs", authenticateToken, isAdmin, (req, res) => {

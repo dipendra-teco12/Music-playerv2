@@ -9,35 +9,50 @@
   }
 </style>
 
-<h5 class="mb-2">My Playlists</h5>
-<div class="card card-success">
-  <div class="card-body">
-    <div class="row" id="playlistContainer">
-      <!-- Dynamic playlist cards will be appended here -->
+<div class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1 class="mb-2">My Playlists</h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="/admin/dashboard">Home</a></li>
+          <li class="breadcrumb-item active">Dashboard</li>
+        </ol>
+      </div>
     </div>
   </div>
-</div>
+  <div class="card card-success">
+    <div class="card-body">
+      <div class="row" id="playlistContainer">
+        <!-- Dynamic playlist cards will be appended here -->
+      </div>
+    </div>
+  </div>
+  </div>
+  
 
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-  async function fetchPlaylists() {
-    try {
-      const response = await axios.get("/admin/my-playlists");
-      console.log("Fetched playlists:", response.data);
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    async function fetchPlaylists() {
+      try {
+        const response = await axios.get("/admin/my-playlists");
+        console.log("Fetched playlists:", response.data);
 
-      const { uniquePlaylists } = response.data; // Fixed typo
+        const { uniquePlaylists } = response.data; // Fixed typo
 
-      // Clear any existing cards
-      $("#playlistContainer").empty();
+        // Clear any existing cards
+        $("#playlistContainer").empty();
 
-      uniquePlaylists.forEach((playlist) => {
-        // If you don't have relatedArtists in the API, remove the artist logic or fetch separately
-        const imageUrl = playlist.coverImage?.trim()
-          ? playlist.coverImage
-          : "https://res.cloudinary.com/dfciwmday/image/upload/v1752753992/MusicApp/defaults/songImage_scnkvu.jpg";
+        uniquePlaylists.forEach((playlist) => {
+          // If you don't have relatedArtists in the API, remove the artist logic or fetch separately
+          const imageUrl = playlist.coverImage?.trim()
+            ? playlist.coverImage
+            : "https://res.cloudinary.com/dfciwmday/image/upload/v1752753992/MusicApp/defaults/songImage_scnkvu.jpg";
 
-        const cardHTML = `
+          const cardHTML = `
           <div class="col-md-12 col-lg-6 col-xl-3">
             <a href="/admin/myPlaylists/songs?playlistId=${playlist._id}"
                style="text-decoration: none;">
@@ -55,22 +70,23 @@
           </div>
         `;
 
-        $("#playlistContainer").append(cardHTML);
-      });
+          $("#playlistContainer").append(cardHTML);
+        });
 
-      // Optionally show a message if nothing to display
-      if (!uniquePlaylists.length) {
+        // Optionally show a message if nothing to display
+        if (!uniquePlaylists.length) {
+          $("#playlistContainer").html(
+            '<p class="text-muted">No playlists found.</p>'
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching playlists:", error);
         $("#playlistContainer").html(
-          '<p class="text-muted">No playlists found.</p>'
+          '<p class="text-danger">Failed to load playlists.</p>'
         );
       }
-    } catch (error) {
-      console.error("Error fetching playlists:", error);
-      $("#playlistContainer").html(
-        '<p class="text-danger">Failed to load playlists.</p>'
-      );
     }
-  }
 
-  $(document).ready(fetchPlaylists);
-</script>
+    $(document).ready(fetchPlaylists);
+  </script>
+</div>

@@ -8,40 +8,55 @@
     border-top-right-radius: 0.25rem;
   }
 </style>
-
-<h5 class="mb-2">My Albums</h5>
-<div class="card card-success">
-  <div class="card-body">
-    <div class="row" id="albumContainer">
-      <!-- Dynamic album cards will be appended here -->
+<div class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1 class="mb-2">My Albums</h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="/admin/dashboard">Home</a></li>
+          <li class="breadcrumb-item active">Dashboard</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <div class="card card-success">
+    <div class="card-body">
+      <div class="row" id="albumContainer">
+        <!-- Dynamic album cards will be appended here -->
+      </div>
     </div>
   </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-  async function fetchAlbums() {
-    try {
-      const response = await axios.get("/admin/my-albums");
-      console.log("Fetched albums:", response.data);
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    async function fetchAlbums() {
+      try {
+        const response = await axios.get("/admin/my-albums");
+        console.log("Fetched albums:", response.data);
 
-      const { uniqueAlbums, relatedArtists } = response.data;
+        const { uniqueAlbums, relatedArtists } = response.data;
 
-      // Limit to 4 albums for layout
-      const limitedAlbums = uniqueAlbums;
+        // Limit to 4 albums for layout
+        const limitedAlbums = uniqueAlbums;
 
-      // Clear existing content
-      $("#albumContainer").empty();
+        // Clear existing content
+        $("#albumContainer").empty();
 
-      // Loop through limited albums
-      limitedAlbums.forEach((album) => {
-        const artist = relatedArtists.find((a) => a.artistAlbum === album._id);
+        // Loop through limited albums
+        limitedAlbums.forEach((album) => {
+          const artist = relatedArtists.find(
+            (a) => a.artistAlbum === album._id
+          );
 
-        const imageUrl = album.albumImage?.trim()
-          ? album.albumImage
-          : "https://res.cloudinary.com/dfciwmday/image/upload/v1752753992/MusicApp/defaults/songImage_scnkvu.jpg";
+          const imageUrl = album.albumImage?.trim()
+            ? album.albumImage
+            : "https://res.cloudinary.com/dfciwmday/image/upload/v1752753992/MusicApp/defaults/songImage_scnkvu.jpg";
 
-        const cardHTML = `
+          const cardHTML = `
   <div class="col-md-12 col-lg-6 col-xl-3">
     <a href="/admin/myAlbums/songs?albumId=${
       album._id
@@ -62,18 +77,19 @@
   </div>
 `;
 
-        $("#albumContainer").append(cardHTML);
-      });
-    } catch (error) {
-      console.error("Error fetching albums:", error);
-      $("#albumContainer").html(
-        '<p class="text-danger">Failed to load albums.</p>'
-      );
+          $("#albumContainer").append(cardHTML);
+        });
+      } catch (error) {
+        console.error("Error fetching albums:", error);
+        $("#albumContainer").html(
+          '<p class="text-danger">Failed to load albums.</p>'
+        );
+      }
     }
-  }
 
-  // Call on page load
-  $(document).ready(() => {
-    fetchAlbums();
-  });
-</script>
+    // Call on page load
+    $(document).ready(() => {
+      fetchAlbums();
+    });
+  </script>
+</div>
