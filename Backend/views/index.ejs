@@ -77,13 +77,12 @@
           <div class="input-group input-group-sm" style="width: 150px">
             <input
               type="text"
-              name="table_search"
+              id="searchInput"
               class="form-control float-right"
-              placeholder="Search"
+              placeholder="Search by title"
             />
-
             <div class="input-group-append">
-              <button type="submit" class="btn btn-default">
+              <button type="button" class="btn btn-default" id="searchBtn">
                 <i class="fas fa-search"></i>
               </button>
             </div>
@@ -149,9 +148,11 @@
     return `${mins}:${secs}`;
   }
 
-  function fetchAllMusics() {
+  function fetchAllMusics(searchQuery = "") {
     axios
-      .get("/admin/songs")
+      .get("/admin/songs", {
+        params: { title: searchQuery },
+      })
       .then((response) => {
         const musicData = response.data;
         const $tbody = $("#music-table-body");
@@ -173,9 +174,7 @@
               <button type="button" class="btn btn-danger delete-btn" data-id="${
                 music._id
               }">
-                
-          <i class="fas fa-trash" aria-hidden="true"></i>
-
+                <i class="fas fa-trash" aria-hidden="true"></i>
               </button>
             </td>
           </tr>
@@ -195,7 +194,7 @@
       .delete(`/admin/song/${id}`)
       .then(() => {
         fetchAllMusics();
-        fetchCounts();
+        fetchCounts?.(); // Safe call in case fetchCounts is defined in another script
       })
       .catch((error) => {
         console.error("❌ Delete failed:", error);
@@ -208,5 +207,18 @@
     deleteMusic(id);
   });
 
-  $(document).ready(fetchAllMusics);
+  $(document).ready(() => {
+    fetchAllMusics();
+
+    $("#searchBtn").on("click", () => {
+      const searchTerm = $("#searchInput").val().trim();
+      fetchAllMusics(searchTerm);
+    });
+
+    $("#searchInput").on("keypress", function (e) {
+      if (e.which === 13) {
+        $("#searchBtn").click();
+      }
+    });
+  });
 </script>

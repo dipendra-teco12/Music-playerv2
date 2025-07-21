@@ -251,7 +251,13 @@ const dashboardCount = async (req, res) => {
 
 const getAllSongs = async (req, res) => {
   try {
-    const musics = await Music.find().lean();
+    const { title } = req.query;
+
+    const filter = title
+      ? { title: { $regex: title, $options: "i" } } // case-insensitive search
+      : {};
+
+    const musics = await Music.find(filter).lean();
     const artists = await Artist.find().lean();
 
     // Create a map of songId to artist name
