@@ -35,16 +35,19 @@ const uploadSong = async (req, res) => {
     }
 
     const songImage = req.files?.songImage?.[0]?.path || DEFAULT_SONG_IMAGE;
-    const songImagePublicId = req.files.songImage?.[0]?.filename;
+    const songImagePublicId = req.files?.songImage?.[0]?.filename;
+
     const artistImage =
       req.files?.artistImage?.[0]?.path || DEFAULT_ARTIST_IMAGE;
 
     const audioFile = req.files?.audioFile?.[0]?.path;
-    const audioFilePublicId = req.files.audioFile?.[0]?.filename;
+    const audioFilePublicId = req.files?.audioFile?.[0]?.filename;
+
     if (!audioFile) {
       return res.status(400).json({ message: "Missing audio file" });
     }
 
+    // Create the song
     const songdata = await Music.create({
       title,
       length,
@@ -57,15 +60,30 @@ const uploadSong = async (req, res) => {
       audioFilePublicId,
     });
 
+    // Normalize and check artist
     if (artistName) {
-      await Artist.create({
-        artistName,
-        artistImage,
-        artistSong: songdata._id,
+      const normalizedName = artistName.trim().toLowerCase();
+
+      let artist = await Artist.findOne({
+        artistName: { $regex: `^${normalizedName}$`, $options: "i" },
       });
+
+      if (artist) {
+        if (!artist.artistSong.includes(songdata._id)) {
+          artist.artistSong.push(songdata._id);
+          await artist.save();
+        }
+      } else {
+        await Artist.create({
+          artistName: artistName.trim(),
+          artistImage,
+          artistSong: [songdata._id],
+        });
+      }
     }
 
     await addSongToPlaylist(playlist, songdata._id);
+
     return res.status(200).json({
       message: "Song uploaded successfully",
       songdata,
@@ -94,12 +112,12 @@ const addAlbum = async (req, res) => {
     }
 
     const songImage = req.files?.songImage?.[0]?.path || DEFAULT_SONG_IMAGE;
-    const songImagePublicId = req.files.songImage?.[0]?.filename;
+    const songImagePublicId = req.files?.songImage?.[0]?.filename;
     const artistImage =
       req.files?.artistImage?.[0]?.path || DEFAULT_ARTIST_IMAGE;
     const albumImage = req.files?.albumImage?.[0]?.path || DEFAULT_ALBUM_IMAGE;
     const audioFile = req.files?.audioFile?.[0]?.path;
-    const audioFilePublicId = req.files.audioFile?.[0]?.filename;
+    const audioFilePublicId = req.files?.audioFile?.[0]?.filename;
 
     if (!audioFile) {
       return res.status(400).json({ message: "Missing audio file" });
@@ -117,23 +135,50 @@ const addAlbum = async (req, res) => {
       audioFilePublicId,
     });
 
-    albumdata = await Album.create({
-      albumName,
-      albumImage,
-      albumSong: songdata._id,
+    const normalizedAlbumName = albumName.trim().toLowerCase();
+    let albumdata = await Album.findOne({
+      albumName: { $regex: `^${normalizedAlbumName}$`, $options: "i" },
     });
 
-    await Artist.create({
-      artistName,
-      artistImage,
-      artistSong: songdata._id,
-      artistAlbum: albumdata._id,
+    if (albumdata) {
+      albumdata.albumSong.push(songdata._id);
+      await albumdata.save();
+    } else {
+      albumdata = await Album.create({
+        albumName: albumName.trim(),
+        albumImage,
+        albumSong: [songdata._id],
+      });
+    }
+
+    const normalizedArtistName = artistName.trim().toLowerCase();
+    let artistdata = await Artist.findOne({
+      artistName: { $regex: `^${normalizedArtistName}$`, $options: "i" },
     });
+
+    if (artistdata) {
+      if (!artistdata.artistSong.includes(songdata._id)) {
+        artistdata.artistSong.push(songdata._id);
+      }
+
+      if (!artistdata.artistAlbum.includes(albumdata._id)) {
+        artistdata.artistAlbum.push(albumdata._id);
+      }
+
+      await artistdata.save();
+    } else {
+      await Artist.create({
+        artistName: artistName.trim(),
+        artistImage,
+        artistSong: [songdata._id],
+        artistAlbum: [albumdata._id],
+      });
+    }
 
     await addSongToPlaylist(playlist, songdata._id);
 
     return res.status(200).json({
-      message: "album uploaded successfully",
+      message: "Album uploaded successfully",
       songdata,
     });
   } catch (error) {
@@ -142,53 +187,64 @@ const addAlbum = async (req, res) => {
   }
 };
 
-const UniqueAlbumsCount = async (req, res) => {
-  try {
-    const albums = await Album.find().lean();
+const getUniqueAlbums = async () => {
+  const uniqueAlbums = await Album.aggregate([
+    { $sort: { createdAt: -1 } },
+    {
+      $group: {
+        _id: "$albumName",
+        doc: { $first: "$$ROOT" },
+      },
+    },
+    { $replaceRoot: { newRoot: "$doc" } },
+  ]);
 
-    const uniqueAlbumsMap = {};
-    const uniqueAlbums = albums.filter((album) => {
-      if (!uniqueAlbumsMap[album.albumName]) {
-        uniqueAlbumsMap[album.albumName] = true;
-        return true;
-      }
-      return false;
-    });
-
-    return uniqueAlbums.length;
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  return uniqueAlbums;
 };
 
-const UniqueArtistCount = async (req, res) => {
-  try {
-    const artist = await Artist.find().lean();
+const getUniqueArtists = async () => {
+  const uniqueArtists = await Artist.aggregate([
+    { $sort: { createdAt: -1 } },
+    {
+      $group: {
+        _id: "$artistName",
+        doc: { $first: "$$ROOT" },
+      },
+    },
+    { $replaceRoot: { newRoot: "$doc" } },
+  ]);
 
-    const uniqueArtistMap = {};
-    const uniqueArtist = artist.filter((artist) => {
-      if (!uniqueArtistMap[artist.artistName]) {
-        uniqueArtistMap[artist.artistName] = true;
-        return true;
-      }
-      return false;
-    });
+  return uniqueArtists;
 
-    return uniqueArtist.length;
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  return result[0]?.uniqueArtistCount || 0;
 };
 
+const getUniquePlaylists = async () => {
+  const uniquePlaylists = await Playlist.aggregate([
+    { $sort: { createdAt: -1 } },
+    {
+      $group: {
+        _id: { $toLower: "$playlistName" },
+        doc: { $first: "$$ROOT" },
+      },
+    },
+    { $replaceRoot: { newRoot: "$doc" } },
+  ]);
+  return uniquePlaylists;
+};
 const dashboardCount = async (req, res) => {
   try {
+    const uniqueAlbums = await getUniqueAlbums();
+    const uniquePlaylists = await getUniquePlaylists();
+    const uniqueArtists = await getUniqueArtists();
+
     res.status(200).json({
       totalSongs: await Music.countDocuments(),
-      totalAlbums: await UniqueAlbumsCount(),
-      totalPlaylists: 5,
-      totalArtists: await UniqueArtistCount(),
+      totalAlbums: uniqueAlbums.length,
+      totalPlaylists: uniquePlaylists.length,
+      totalArtists: uniqueArtists.length,
     });
-  } catch {
+  } catch (err) {
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -196,21 +252,30 @@ const dashboardCount = async (req, res) => {
 const getAllSongs = async (req, res) => {
   try {
     const musics = await Music.find().lean();
-
     const artists = await Artist.find().lean();
 
-    const enriched = musics.map((music) => {
-      const artist = artists.find(
-        (a) => String(a.artistSong) === String(music._id)
-      );
-      return {
-        ...music,
-        singer: artist?.artistName || "Unknown",
-      };
+    // Create a map of songId to artist name
+    const songArtistMap = new Map();
+
+    artists.forEach((artist) => {
+      const songs = Array.isArray(artist.artistSong)
+        ? artist.artistSong
+        : [artist.artistSong];
+
+      songs.forEach((songId) => {
+        songArtistMap.set(String(songId), artist.artistName);
+      });
     });
+
+    // Enrich songs with singer name
+    const enriched = musics.map((music) => ({
+      ...music,
+      singer: songArtistMap.get(String(music._id)) || "Unknown",
+    }));
 
     res.json(enriched);
   } catch (err) {
+    console.error("Error fetching songs:", err);
     res
       .status(500)
       .json({ message: "Error fetching music", error: err.message });
@@ -252,24 +317,18 @@ const deleteSong = async (req, res) => {
 
 const UniqueAlbums = async (req, res) => {
   try {
-    const albums = await Album.find();
+    const uniqueAlbums = await getUniqueAlbums();
 
-    const uniqueAlbumsMap = {};
-    const uniqueAlbums = albums.filter((album) => {
-      if (!uniqueAlbumsMap[album.albumName]) {
-        uniqueAlbumsMap[album.albumName] = true;
-        return true;
-      }
-      return false;
-    });
-
-    const albumIds = uniqueAlbums.map((album) => album._id);
-
+    const albumIds = uniqueAlbums.map((a) => a._id);
     const relatedArtists = await Artist.find({
       artistAlbum: { $in: albumIds },
     });
 
-    res.json({ uniqueAlbums, relatedArtists });
+    res.json({
+      uniqueAlbums,
+      relatedArtists,
+      totalUniqueAlbums: uniqueAlbums.length,
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -305,25 +364,20 @@ const albumRelatedSongs = async (req, res) => {
 
 const UniquePlaylists = async (req, res) => {
   try {
-  
-    const playlists = await Playlist.find();
-
-
-    const uniqueMap = {};
-    const uniquePlaylists = playlists.filter((pl) => {
-      if (!uniqueMap[pl.playlistName]) {
-        uniqueMap[pl.playlistName] = true;
-        return true;
-      }
-      return false;
-    });
-
+    const uniquePlaylists = await getUniquePlaylists();
     res.json({ uniquePlaylists });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
-
+const UniqueArtist = async (req, res) => {
+  try {
+    const uniqueArtists = await getUniqueArtists();
+    res.json({ uniqueArtists });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 const getSongsByAlbum = async (req, res) => {
   try {
     const { albumId } = req.query;
@@ -378,6 +432,31 @@ const getSongsByPlaylist = async (req, res) => {
   }
 };
 
+const artistAlbums = async (req, res) => {
+  try {
+    const { artistId } = req.query;
+
+    if (!artistId) {
+      return res.status(400).json({ message: "Artist ID is required." });
+    }
+
+    const artist = await Artist.findById(artistId).populate("artistAlbum");
+
+    if (!artist) {
+      return res.status(404).json({ message: "Artist not found." });
+    }
+
+    res.status(200).json({
+      artistName: artist.artistName,
+      artistId: artist._id,
+      albums: artist.artistAlbum || [],
+    });
+  } catch (err) {
+    console.error("Error fetching artist albums:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
   uploadSong,
   addAlbum,
@@ -385,8 +464,10 @@ module.exports = {
   getAllSongs,
   deleteSong,
   UniqueAlbums,
+  UniqueArtist,
   albumRelatedSongs,
   UniquePlaylists,
   getSongsByAlbum,
   getSongsByPlaylist,
+  artistAlbums,
 };

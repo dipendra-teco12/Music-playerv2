@@ -1,0 +1,105 @@
+<style>
+  .card-img-top {
+    width: 100%;
+    height: 200px; /* Adjust height as needed */
+    object-fit: cover;
+    object-position: center;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+  }
+</style>
+
+<div class="content-header">
+  <div class="container-fluid">
+    <div class="row mb-2">
+      <div class="col-sm-6">
+        <h1 class="mb-2" id="artistTitle">Artist Albums</h1>
+      </div>
+      <div class="col-sm-6">
+        <ol class="breadcrumb float-sm-right">
+          <li class="breadcrumb-item"><a href="/admin/dashboard">Home</a></li>
+          <li class="breadcrumb-item active">Artist Albums</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <div class="card card-success">
+    <div class="card-body">
+      <div class="row" id="albumContainer">
+        <!-- Dynamic album cards will be appended here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  async function fetchArtistAlbums(artistId) {
+    try {
+      if (!artistId) {
+        $("#albumContainer").html(
+          '<p class="text-danger">Artist ID is missing.</p>'
+        );
+        return;
+      }
+      const response = await axios.get(
+        `/admin/api/myArtists/albums?artistId=${artistId}`
+      );
+      console.log("Fetched artist albums:", response.data);
+
+      const { artistName, albums } = response.data;
+
+      // Update title with artist name
+      $("#artistTitle").text(`${artistName}'s Albums`);
+
+      // Clear existing albums
+      $("#albumContainer").empty();
+
+      if (!albums || albums.length === 0) {
+        $("#albumContainer").html("<p>No albums found for this artist.</p>");
+        return;
+      }
+
+      albums.forEach((album) => {
+        const imageUrl = album.albumImage?.trim()
+          ? album.albumImage
+          : "https://res.cloudinary.com/dfciwmday/image/upload/v1752753992/MusicApp/defaults/songImage_scnkvu.jpg";
+
+        const cardHTML = `
+          <div class="col-md-12 col-lg-6 col-xl-3">
+            <a href="/admin/myAlbums/songs?albumId=${album._id}" style="text-decoration: none;">
+              <div class="card mb-2 bg-gradient-dark">
+                <img class="card-img-top"
+                  src="${imageUrl}"
+                  alt="${album.albumName}"
+                  onerror="this.onerror=null; this.src='https://res.cloudinary.com/dfciwmday/image/upload/v1752753992/MusicApp/defaults/songImage_scnkvu.jpg';" />
+                <div class="card-img-overlay d-flex flex-column justify-content-end">
+                  <h5 class="card-title text-white">${album.albumName}</h5>
+                </div>
+              </div>
+            </a>
+          </div>
+        `;
+
+        $("#albumContainer").append(cardHTML);
+      });
+    } catch (error) {
+      console.error("Error fetching artist albums:", error);
+      $("#albumContainer").html(
+        '<p class="text-danger">Failed to load albums.</p>'
+      );
+    }
+  }
+
+  // Example: get artistId from URL query param
+  function getArtistIdFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get("artistId");
+  }
+
+  $(document).ready(() => {
+    const artistId = getArtistIdFromUrl();
+    fetchArtistAlbums(artistId);
+  });
+</script>

@@ -10,6 +10,8 @@ const {
   UniquePlaylists,
   getSongsByAlbum,
   getSongsByPlaylist,
+  UniqueArtist,
+  artistAlbums,
 } = require("../Controllers/admin.Controller");
 
 const authenticateToken = require("../Middlewares/authMiddleware");
@@ -34,7 +36,7 @@ router.post(
     { name: "songImage", maxCount: 1 },
     { name: "artistImage", maxCount: 1 },
     { name: "albumImage", maxCount: 1 },
-    { name: "audioFile", maxCount: 1 }, 
+    { name: "audioFile", maxCount: 1 },
   ]),
   addAlbum
 );
@@ -75,10 +77,13 @@ router.get("/myPlaylist", authenticateToken, isAdmin, (req, res) => {
   res.render("myPlaylist", { activePage: "myPlaylist" });
 });
 
-router.get("/artist", authenticateToken, isAdmin, (req, res) => {
-  res.render("artist", { activePage: "artist" });
+router.get("/myArtist", authenticateToken, isAdmin, (req, res) => {
+  res.render("myArtist", { activePage: "artist" });
 });
 
+router.get("/myArtists/albums", authenticateToken, isAdmin, (req, res) => {
+  res.render("myArtistAlbums", { activePage: "artist" });
+});
 router.get("/myAlbums/songs", authenticateToken, isAdmin, (req, res) => {
   res.render("myAlbumSongs", {
     title: "My Albums Songs",
@@ -103,7 +108,11 @@ router.get("/my-albums", authenticateToken, UniqueAlbums);
 
 router.get("/my-playlists", authenticateToken, UniquePlaylists);
 
+router.get("/my-artists", authenticateToken, UniqueArtist);
+
 router.get("/api/myAlbums/songs", authenticateToken, getSongsByAlbum);
 router.get("/api/myPlaylists/songs", authenticateToken, getSongsByPlaylist);
+
+router.get("/api/myArtists/albums", authenticateToken, artistAlbums);
 
 module.exports = router;

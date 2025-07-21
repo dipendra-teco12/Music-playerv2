@@ -48,9 +48,18 @@
 
         // Loop through limited albums
         limitedAlbums.forEach((album) => {
-          const artist = relatedArtists.find(
-            (a) => a.artistAlbum === album._id
-          );
+         const artistMap = new Map();
+relatedArtists.forEach((artist) => {
+  const albums = Array.isArray(artist.artistAlbum)
+    ? artist.artistAlbum
+    : [artist.artistAlbum];
+
+  albums.forEach((albumId) => {
+    const key = albumId?.toString();
+    if (key) artistMap.set(key, artist);
+  });
+});
+const artist = artistMap.get(album._id.toString());
 
           const imageUrl = album.albumImage?.trim()
             ? album.albumImage
