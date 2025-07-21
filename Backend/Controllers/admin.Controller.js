@@ -284,15 +284,15 @@ const getAllSongs = async (req, res) => {
 
 const deleteSong = async (req, res) => {
   try {
-    const song = await Music.findById(req.params.id);
+    const songId = req.params.id;
+    const song = await Music.findById(songId);
     if (!song) return res.status(404).json({ message: "Music not found" });
 
+    // Delete from Cloudinary if present
     const deletions = [];
-
     if (song.songImagePublicId) {
       deletions.push(cloudinary.uploader.destroy(song.songImagePublicId));
     }
-
     if (song.audioFilePublicId) {
       deletions.push(
         cloudinary.uploader.destroy(song.audioFilePublicId, {
@@ -300,15 +300,32 @@ const deleteSong = async (req, res) => {
         })
       );
     }
-
     await Promise.all(deletions);
-    await Artist.deleteMany({ artistSong: req.params.id });
-    await Album.deleteMany({ albumSong: req.params.id });
-    await Playlist.deleteMany({ playlistSong: req.params.id });
-    await Music.findByIdAndDelete(req.params.id);
+
+    // Remove song reference from Artist(s)
+    await Artist.updateMany(
+      { artistSong: songId },
+      { $pull: { artistSong: songId } }
+    );
+
+    // Remove song reference from Album(s)
+    await Album.updateMany(
+      { albumSong: songId },
+      { $pull: { albumSong: songId } }
+    );
+
+    // Remove song from Playlist(s)
+    await Playlist.updateMany(
+      { playlistSong: songId },
+      { $pull: { playlistSong: songId } }
+    );
+
+    // Delete the song
+    await Music.findByIdAndDelete(songId);
 
     res.json({ message: "Music deleted successfully" });
   } catch (err) {
+    console.error("Error deleting music:", err);
     res
       .status(500)
       .json({ message: "Error deleting music", error: err.message });
