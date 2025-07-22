@@ -49,9 +49,11 @@ app.use(
 app.get("/", (req, res) => {
   res.render("authViews/login", { layout: false });
 });
+const songRoutes = require("./Routes/songRoutes");
 app.use("/api/auth", authRoute);
 app.use("/auth/google", oauthRoute);
 app.use("/admin", adminRoutes);
+app.use("/api/song", songRoutes);
 
 connectDB();
 
