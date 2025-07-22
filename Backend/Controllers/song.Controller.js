@@ -1,3 +1,4 @@
+const Music = require("../Models/music.Model");
 const FavoriteSong = require("../Models/favoriteSong.Model");
 
 const addFavoriteSong = async (req, res) => {
@@ -50,8 +51,6 @@ const FavoriteSongList = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
-const Music = require("../Models/music.Model");
 
 const getSong = async (req, res) => {
   try {

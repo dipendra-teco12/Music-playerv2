@@ -12,6 +12,8 @@ const {
   getSongsByPlaylist,
   UniqueArtist,
   artistAlbums,
+  deleteAlbum,
+  deletePlaylist,
 } = require("../Controllers/admin.Controller");
 
 const authenticateToken = require("../Middlewares/authMiddleware");
@@ -114,5 +116,13 @@ router.get("/api/myAlbums/songs", authenticateToken, getSongsByAlbum);
 router.get("/api/myPlaylists/songs", authenticateToken, getSongsByPlaylist);
 
 router.get("/api/myArtists/albums", authenticateToken, artistAlbums);
+
+router.delete("/delete-album/:albumId", authenticateToken, deleteAlbum);
+
+router.delete(
+  "/delete-playlist/:playlistId",
+  authenticateToken,
+  deletePlaylist
+);
 
 module.exports = router;

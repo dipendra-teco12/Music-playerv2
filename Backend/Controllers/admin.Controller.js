@@ -3,6 +3,8 @@ const Music = require("../Models/music.Model");
 const Artist = require("../Models/artist.Model");
 const Album = require("../Models/album.Model");
 const Playlist = require("../Models/playlist.Model");
+
+const mongoose = require("mongoose");
 const DEFAULT_SONG_IMAGE =
   "https://res.cloudinary.com/dfciwmday/image/upload/v1752668321/MusicApp/Images/songImage_gz8nht.jpg";
 const DEFAULT_ARTIST_IMAGE =
@@ -10,13 +12,12 @@ const DEFAULT_ARTIST_IMAGE =
 const DEFAULT_ALBUM_IMAGE =
   "https://res.cloudinary.com/dfciwmday/image/upload/v1752668322/MusicApp/Images/albumImage_quzow6.jpg";
 
-async function addSongToPlaylist(playlistName, songId) {
-  return Playlist.findOneAndUpdate(
-    { playlistName },
-    { $addToSet: { playlistSong: songId } },
-    { upsert: true, new: true }
-  );
-}
+const {
+  addSongToPlaylist,
+  getUniqueAlbums,
+  getUniqueArtists,
+  getUniquePlaylists,
+} = require("../services/adminServices");
 
 const uploadSong = async (req, res) => {
   try {
@@ -187,51 +188,6 @@ const addAlbum = async (req, res) => {
   }
 };
 
-const getUniqueAlbums = async () => {
-  const uniqueAlbums = await Album.aggregate([
-    { $sort: { createdAt: -1 } },
-    {
-      $group: {
-        _id: "$albumName",
-        doc: { $first: "$$ROOT" },
-      },
-    },
-    { $replaceRoot: { newRoot: "$doc" } },
-  ]);
-
-  return uniqueAlbums;
-};
-
-const getUniqueArtists = async () => {
-  const uniqueArtists = await Artist.aggregate([
-    { $sort: { createdAt: -1 } },
-    {
-      $group: {
-        _id: "$artistName",
-        doc: { $first: "$$ROOT" },
-      },
-    },
-    { $replaceRoot: { newRoot: "$doc" } },
-  ]);
-
-  return uniqueArtists;
-
-  return result[0]?.uniqueArtistCount || 0;
-};
-
-const getUniquePlaylists = async () => {
-  const uniquePlaylists = await Playlist.aggregate([
-    { $sort: { createdAt: -1 } },
-    {
-      $group: {
-        _id: { $toLower: "$playlistName" },
-        doc: { $first: "$$ROOT" },
-      },
-    },
-    { $replaceRoot: { newRoot: "$doc" } },
-  ]);
-  return uniquePlaylists;
-};
 const dashboardCount = async (req, res) => {
   try {
     const uniqueAlbums = await getUniqueAlbums();
@@ -285,56 +241,6 @@ const getAllSongs = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error fetching music", error: err.message });
-  }
-};
-
-const deleteSong = async (req, res) => {
-  try {
-    const songId = req.params.id;
-    const song = await Music.findById(songId);
-    if (!song) return res.status(404).json({ message: "Music not found" });
-
-    // Delete from Cloudinary if present
-    const deletions = [];
-    if (song.songImagePublicId) {
-      deletions.push(cloudinary.uploader.destroy(song.songImagePublicId));
-    }
-    if (song.audioFilePublicId) {
-      deletions.push(
-        cloudinary.uploader.destroy(song.audioFilePublicId, {
-          resource_type: "video",
-        })
-      );
-    }
-    await Promise.all(deletions);
-
-    // Remove song reference from Artist(s)
-    await Artist.updateMany(
-      { artistSong: songId },
-      { $pull: { artistSong: songId } }
-    );
-
-    // Remove song reference from Album(s)
-    await Album.updateMany(
-      { albumSong: songId },
-      { $pull: { albumSong: songId } }
-    );
-
-    // Remove song from Playlist(s)
-    await Playlist.updateMany(
-      { playlistSong: songId },
-      { $pull: { playlistSong: songId } }
-    );
-
-    // Delete the song
-    await Music.findByIdAndDelete(songId);
-
-    res.json({ message: "Music deleted successfully" });
-  } catch (err) {
-    console.error("Error deleting music:", err);
-    res
-      .status(500)
-      .json({ message: "Error deleting music", error: err.message });
   }
 };
 
@@ -435,7 +341,6 @@ const getSongsByPlaylist = async (req, res) => {
       return res.status(400).json({ error: "playlistId is required" });
     }
 
-    // Populate the correct field: playlistSong
     const playlist = await Playlist.findById(playlistId).populate({
       path: "playlistSong",
       options: { sort: { releaseDate: -1 } },
@@ -445,7 +350,6 @@ const getSongsByPlaylist = async (req, res) => {
       return res.status(404).json({ error: "Playlist not found" });
     }
 
-    // Playlist.title may not exist; likely it's playlist.playlistName
     res.json({
       title: playlist.playlistName,
       songs: playlist.playlistSong,
@@ -480,6 +384,105 @@ const artistAlbums = async (req, res) => {
   }
 };
 
+const deleteSong = async (req, res) => {
+  try {
+    const songId = req.params.id;
+    const song = await Music.findById(songId);
+    if (!song) return res.status(404).json({ message: "Music not found" });
+
+    const deletions = [];
+    if (song.songImagePublicId) {
+      deletions.push(cloudinary.uploader.destroy(song.songImagePublicId));
+    }
+    if (song.audioFilePublicId) {
+      deletions.push(
+        cloudinary.uploader.destroy(song.audioFilePublicId, {
+          resource_type: "video",
+        })
+      );
+    }
+    await Promise.all(deletions);
+
+    await Artist.updateMany(
+      { artistSong: songId },
+      { $pull: { artistSong: songId } }
+    );
+
+    await Album.updateMany(
+      { albumSong: songId },
+      { $pull: { albumSong: songId } }
+    );
+
+    await Playlist.updateMany(
+      { playlistSong: songId },
+      { $pull: { playlistSong: songId } }
+    );
+
+    await Music.findByIdAndDelete(songId);
+
+    res.json({ message: "Music deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting music:", err);
+    res
+      .status(500)
+      .json({ message: "Error deleting music", error: err.message });
+  }
+};
+const deleteAlbum = async (req, res) => {
+  try {
+    const { albumId } = req.params;
+
+    if (!albumId) {
+      return res.status(400).json({ message: "albumid is missing" });
+    }
+    if (!mongoose.Types.ObjectId.isValid(albumId)) {
+      return res.status(400).json({ message: "Invalid albumId format" });
+    }
+
+    const album = await Album.findOneAndDelete({ _id: albumId });
+
+    await Artist.updateMany(
+      { artistAlbum: albumId },
+      { $pull: { artistAlbum: albumId } }
+    );
+
+    if (!album) {
+      return res
+        .status(404)
+        .json({ message: "Album not found or already deleted" });
+    }
+
+    res.status(204).json();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+const deletePlaylist = async (req, res) => {
+  try {
+    const { playlistId } = req.params;
+
+    if (!playlistId) {
+      return res.status(400).json({ message: "playlist id is missing" });
+    }
+    if (!mongoose.Types.ObjectId.isValid(playlistId)) {
+      return res.status(400).json({ message: "Invalid playlistId format" });
+    }
+
+    const playlist = await Playlist.findOneAndDelete({ _id: playlistId });
+    if (!playlist)
+      return res
+        .status(404)
+        .json({ message: "Playlist not found or  already deleted" });
+
+    res.status(204).json();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   uploadSong,
   addAlbum,
@@ -493,4 +496,6 @@ module.exports = {
   getSongsByAlbum,
   getSongsByPlaylist,
   artistAlbums,
+  deleteAlbum,
+  deletePlaylist,
 };
