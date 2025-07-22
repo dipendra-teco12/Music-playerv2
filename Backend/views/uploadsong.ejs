@@ -194,50 +194,56 @@
   </section>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <script>
-    $(".custom-file-input").on("change", function () {
-      const fileName =
-        this.files.length > 1
-          ? Array.from(this.files)
-              .map((f) => f.name)
-              .join(", ")
-          : this.files[0]?.name || "Choose file";
-      $(this).siblings(".custom-file-label").text(fileName);
-    });
-  </script>
 
   <script>
     $(document).ready(function () {
       $("#uploadForm").on("submit", async function (e) {
         e.preventDefault();
 
+        const $form = $(this);
+        const $btn = $form.find("button[type=submit]");
+
+        // Disable button and show feedback
+        $btn.prop("disabled", true).text("Uploading…");
+
         const formData = new FormData(this);
         formData.append("genre", $("#genreSelect").val());
         formData.append("playlist", $("#playlistSelect").val());
-        // for (let [key, value] of formData.entries()) {
-        //   console.log(`${key}:`, value);
-        // }
+
         try {
           const response = await axios.post("/admin/upload", formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-            withCredentials: true, // Ensure cookies are sent with the request
+            headers: { "Content-Type": "multipart/form-data" },
+            withCredentials: true,
           });
 
           if (response.status === 200) {
             alert("Song uploaded successfully!");
-            // Optionally reset form:
-            // this.reset();
+            // Reset form fields, including file inputs
+            this.reset();
+
+            // Reset all custom-file labels
+            $form.find(".custom-file-label").text("Choose file");
           }
         } catch (error) {
           console.error(
             "Upload error:",
             error.response?.data || error.message || error
           );
-
           alert(error.response?.data?.message || "Failed to upload song.");
+        } finally {
+          // Re-enable button and restore text
+          $btn.prop("disabled", false).text("Upload");
         }
+      });
+
+      $(".custom-file-input").on("change", function () {
+        const fileName =
+          this.files.length > 1
+            ? Array.from(this.files)
+                .map((f) => f.name)
+                .join(", ")
+            : this.files[0]?.name || "Choose file";
+        $(this).siblings(".custom-file-label").text(fileName);
       });
     });
   </script>
