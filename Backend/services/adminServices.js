@@ -2,14 +2,23 @@ const Playlist = require("../Models/playlist.Model");
 const Album = require("../Models/album.Model");
 const Artist = require("../Models/artist.Model");
 
-
-
 const addSongToPlaylist = async (playlistName, songId) => {
-  return await Playlist.findOneAndUpdate(
-    { playlistName },
-    { $addToSet: { playlistSong: songId } },
-    { upsert: true, new: true }
-  );
+  try {
+    const playlist = await Playlist.findOneAndUpdate(
+      { playlistName },
+      { $addToSet: { playlistSong: songId } },
+      { upsert: true, new: true }
+    );
+
+    if (!playlist) {
+      throw new Error("Failed to add song to playlist");
+    }
+
+    return playlist;
+  } catch (error) {
+    console.error("Error adding song to playlist:", error);
+    throw error;
+  }
 };
 
 const getUniqueAlbums = async () => {
