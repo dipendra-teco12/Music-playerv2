@@ -61,6 +61,30 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script>
+    async function fetchCounts() {
+      try {
+        const response = await axios.get("/admin/dashboardcount");
+
+        $("#song-box").text(response.data.totalSongs ?? 0);
+        $("#album-box").text(response.data.totalAlbums ?? 0);
+        $("#playlist-box").text(response.data.totalPlaylists ?? 0);
+        $("#artist-box").text(response.data.totalArtists ?? 0);
+      } catch (error) {
+        console.error("Error fetching counts:", error);
+
+        $("#song-box").text(0);
+        $("#album-box").text(0);
+        $("#playlist-box").text(0);
+        $("#artist-box").text(0);
+      }
+    }
+
+    $(document).ready(() => {
+      fetchCounts();
+      setInterval(fetchCounts, 30000);
+    });
+  </script>
+  <script>
     function formatLength(seconds) {
       if (!seconds || isNaN(seconds)) return "N/A";
       const mins = Math.floor(seconds / 60);
