@@ -1,7 +1,7 @@
 <style>
   .card-img-top {
     width: 100%;
-    height: 200px; /* Adjust height as needed */
+    height: 200px;
     object-fit: cover;
     object-position: center;
     border-top-left-radius: 0.25rem;
@@ -25,9 +25,7 @@
   </div>
   <div class="card card-success">
     <div class="card-body">
-      <div class="row" id="albumContainer">
-        <!-- Dynamic album cards will be appended here -->
-      </div>
+      <div class="row" id="albumContainer"></div>
     </div>
   </div>
 </div>
@@ -50,10 +48,8 @@
 
       const { artistName, albums } = response.data;
 
-      // Update title with artist name
       $("#artistTitle").text(`${artistName}'s Albums`);
 
-      // Clear existing albums
       $("#albumContainer").empty();
 
       if (!albums || albums.length === 0) {
@@ -92,7 +88,6 @@
     }
   }
 
-  // Example: get artistId from URL query param
   function getArtistIdFromUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get("artistId");

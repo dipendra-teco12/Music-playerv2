@@ -5,14 +5,21 @@ const {
   removeFavoriteSong,
   FavoriteSongList,
   getSong,
+  likeSong,
+  disLikeSong,
 } = require("../Controllers/song.Controller");
+const authenticateToken = require("../Middlewares/authMiddleware");
 
-router.post("/favorite-song", addFavoriteSong);
+router.post("/favorite-song", authenticateToken, addFavoriteSong);
 
-router.delete("/favorite-song", removeFavoriteSong);
+router.delete("/favorite-song", authenticateToken, removeFavoriteSong);
 
-router.get("/user/:userId", FavoriteSongList);
+router.get("/user", authenticateToken, FavoriteSongList);
 
-router.get("/:songId/", getSong);
+router.get("/:songId/", authenticateToken, getSong);
+
+router.post("/like", authenticateToken, likeSong);
+
+router.post("/dislike", authenticateToken, disLikeSong);
 
 module.exports = router;

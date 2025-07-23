@@ -35,7 +35,7 @@
             </div>
           </div>
         </div>
-        <!-- /.card-header -->
+
         <div class="card-body table-responsive p-0">
           <table class="table table-hover text-nowrap">
             <thead>
@@ -48,14 +48,10 @@
                 <th>Action</th>
               </tr>
             </thead>
-            <tbody id="music-table-body">
-              <!-- Rows will be injected here using jQuery -->
-            </tbody>
+            <tbody id="music-table-body"></tbody>
           </table>
         </div>
-        <!-- /.card-body -->
       </div>
-      <!-- /.card -->
     </div>
   </div>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -111,10 +107,15 @@
           <tr>
             <td>${music.title}</td>
             <td>${releaseDate}</td>
-            <td><span class="tag tag-success">${music.views ?? 0}</span></td>
+            <td><span class="tag tag-success">${
+              music.likesCount ?? 0
+            }</span></td>
             <td>${music.singer ?? "Unknown"}</td>
             <td>${formatLength(music.length)}</td>
             <td>
+                   <button type="button" class="btn  btn-primary" data-id="${
+                     music._id
+                   }"> <i class="fas fa-edit"></i></button>
               <button type="button" class="btn btn-danger delete-btn" data-id="${
                 music._id
               }">
@@ -127,7 +128,7 @@
           });
         })
         .catch((error) => {
-          console.error("❌ Failed to fetch musics:", error);
+          console.error("Failed to fetch musics:", error);
         });
     }
 
@@ -138,10 +139,10 @@
         .delete(`/admin/song/${id}`)
         .then(() => {
           fetchAllMusics();
-          fetchCounts?.(); // Safe call in case fetchCounts is defined in another script
+          fetchCounts?.();
         })
         .catch((error) => {
-          console.error("❌ Delete failed:", error);
+          console.error("Delete failed:", error);
           alert("Delete failed. See console for details.");
         });
     }

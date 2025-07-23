@@ -40,13 +40,13 @@
 
         const { uniqueAlbums, relatedArtists } = response.data;
 
-        // Limit to 4 albums for layout
+       
         const limitedAlbums = uniqueAlbums;
 
-        // Clear existing content
+    
         $("#albumContainer").empty();
 
-        // Loop through limited albums
+     
         limitedAlbums.forEach((album) => {
          const artistMap = new Map();
 relatedArtists.forEach((artist) => {

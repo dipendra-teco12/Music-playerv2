@@ -1,9 +1,11 @@
 const Music = require("../Models/music.Model");
 const FavoriteSong = require("../Models/favoriteSong.Model");
+const LikedSong = require("../Models/likedSong.Model");
 
 const addFavoriteSong = async (req, res) => {
   try {
-    const { userId, songId } = req.body;
+    const userId = req.user.id;
+    const { songId } = req.body;
     if (!userId || !songId) {
       return res.status(400).json({ message: "Missing userId or songId" });
     }
@@ -23,7 +25,8 @@ const addFavoriteSong = async (req, res) => {
 
 const removeFavoriteSong = async (req, res) => {
   try {
-    const { userId, songId } = req.body;
+    const userId = req.user.id;
+    const { songId } = req.body;
     if (!userId || !songId) {
       return res.status(400).json({ message: "Missing userId or songId" });
     }
@@ -40,10 +43,13 @@ const removeFavoriteSong = async (req, res) => {
 
 const FavoriteSongList = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const userId = req.user.id;
     const favs = await FavoriteSong.find({ userId })
       .populate("songId")
       .sort("-createdAt");
+    if (favs.length === 0) {
+      return res.status(200).json({ message: "user has not favorite songs" });
+    }
     res
       .status(200)
       .json({ message: "fetched the favorite songs successfully", favs });
@@ -74,9 +80,55 @@ const getSong = async (req, res) => {
   }
 };
 
+const likeSong = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { songId } = req.body;
+
+    if (!userId || !songId)
+      return res.status(400).json({ message: "user id or song id is missing" });
+
+    const existing = await LikedSong.findOne({ userId, songId });
+    if (existing) return res.status(400).json({ message: "Already liked" });
+
+    const likeSong = await LikedSong.create({ songId, userId });
+
+    await Music.findByIdAndUpdate(songId, { $inc: { likesCount: 1 } });
+
+    res.status(200).json({ message: "song liked successfully", likeSong });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+const disLikeSong = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { songId } = req.body;
+
+    if (!userId || !songId)
+      return res.status(400).json({ message: "user id or song id is missing" });
+
+    const removed = await LikedSong.findOneAndDelete({ userId, songId });
+    if (!removed)
+      return res.status(400).json({ message: "Not previously liked" });
+
+    await Music.findByIdAndUpdate(songId, { $inc: { likesCount: -1 } });
+
+    res
+      .status(200)
+      .json({ message: "song disliked successfully", disLikeSong });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 module.exports = {
   addFavoriteSong,
   removeFavoriteSong,
   FavoriteSongList,
   getSong,
+  likeSong,
+  disLikeSong,
 };

@@ -26,7 +26,7 @@
   <div class="card card-success">
     <div class="card-body">
       <div class="row" id="playlistContainer">
-        <!-- Dynamic playlist cards will be appended here -->
+     
       </div>
     </div>
   </div>
@@ -41,13 +41,12 @@
         const response = await axios.get("/admin/my-playlists");
         console.log("Fetched playlists:", response.data);
 
-        const { uniquePlaylists } = response.data; // Fixed typo
+        const { uniquePlaylists } = response.data; 
 
-        // Clear any existing cards
         $("#playlistContainer").empty();
 
         uniquePlaylists.forEach((playlist) => {
-          // If you don't have relatedArtists in the API, remove the artist logic or fetch separately
+      
           const imageUrl = playlist.coverImage?.trim()
             ? playlist.coverImage
             : "https://res.cloudinary.com/dfciwmday/image/upload/v1752753992/MusicApp/defaults/songImage_scnkvu.jpg";
@@ -73,7 +72,7 @@
           $("#playlistContainer").append(cardHTML);
         });
 
-        // Optionally show a message if nothing to display
+
         if (!uniquePlaylists.length) {
           $("#playlistContainer").html(
             '<p class="text-muted">No playlists found.</p>'

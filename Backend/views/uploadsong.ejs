@@ -203,7 +203,7 @@
         const $form = $(this);
         const $btn = $form.find("button[type=submit]");
 
-        // Disable button and show feedback
+        
         $btn.prop("disabled", true).text("Uploading…");
 
         const formData = new FormData(this);
@@ -218,10 +218,10 @@
 
           if (response.status === 200) {
             alert("Song uploaded successfully!");
-            // Reset form fields, including file inputs
+
             this.reset();
 
-            // Reset all custom-file labels
+
             $form.find(".custom-file-label").text("Choose file");
           }
         } catch (error) {
@@ -231,7 +231,7 @@
           );
           alert(error.response?.data?.message || "Failed to upload song.");
         } finally {
-          // Re-enable button and restore text
+
           $btn.prop("disabled", false).text("Upload");
         }
       });

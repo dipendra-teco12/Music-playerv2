@@ -167,15 +167,19 @@
           <tr>
             <td>${music.title}</td>
             <td>${releaseDate}</td>
-            <td><span class="tag tag-success">${music.views ?? 0}</span></td>
+            <td><span class="tag tag-success">${
+              music.likesCount ?? 0
+            }</span></td>
             <td>${music.singer ?? "Unknown"}</td>
             <td>${formatLength(music.length)}</td>
             <td>
-              <button type="button" class="btn btn-danger delete-btn" data-id="${
-                music._id
-              }">
-                <i class="fas fa-trash" aria-hidden="true"></i>
-              </button>
+               <button type="button" class="btn  btn-primary" data-id="${
+                 music._id
+               }"> <i class="fas fa-edit"></i></button>
+               
+                <button type="button" class="btn btn-danger delete-btn" data-id="${
+                  music._id
+                }"> <i class="fas fa-trash" aria-hidden="true"></i> </button>
             </td>
           </tr>
         `;

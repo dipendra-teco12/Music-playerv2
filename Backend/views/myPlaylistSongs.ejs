@@ -70,12 +70,16 @@
             <tr>
               <td>${s.title}</td>
               <td>${date}</td>
-              <td>${s.views ?? 0}</td>
+              <td>${s.likesCount ?? 0}</td>
               <td>${s.genre ?? "Unknown"}</td>
               <td>${fmtLen(s.length)}</td>
-              <td><button class="btn btn-danger del" data-id="${
-                s._id
-              }"><i class="fas fa-trash"></i></button></td>
+              <td>
+                     <button type="button" class="btn  btn-primary" data-id="${
+                       s._id
+                     }"> <i class="fas fa-edit"></i></button>
+                <button class="btn btn-danger del" data-id="${
+                  s._id
+                }"><i class="fas fa-trash"></i></button></td>
             </tr>`;
           $tb.append(row);
         });

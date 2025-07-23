@@ -79,10 +79,15 @@
             <tr>
               <td>${song.title}</td>
               <td>${date}</td>
-              <td><span class="tag tag-success">${song.views ?? 0}</span></td>
+              <td><span class="tag tag-success">${
+                song.likesCount ?? 0
+              }</span></td>
               <td>${song.genre ?? "Unknown"}</td>
               <td>${formatLength(song.length)}</td>
               <td>
+                     <button type="button" class="btn  btn-primary" data-id="${
+                       song._id
+                     }"> <i class="fas fa-edit"></i></button>
                 <button class="btn btn-danger delete-btn" data-id="${song._id}">
                   <i class="fas fa-trash"></i>
                 </button>

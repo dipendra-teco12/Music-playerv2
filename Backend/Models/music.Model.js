@@ -27,8 +27,9 @@ const musicSchema = new mongoose.Schema(
     releaseDate: {
       type: Date,
     },
-    views: {
+    likesCount: {
       type: Number,
+      default: 0,
     },
     description: {
       type: String,
