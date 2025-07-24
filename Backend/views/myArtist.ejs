@@ -77,6 +77,11 @@
 
         $("#artistContainer").append(cardHTML);
       });
+      if (!uniqueArtists.length) {
+        $("#artistContainer").html(
+          '<p class="text-muted">No artist found.</p>'
+        );
+      }
     } catch (error) {
       console.error("Error fetching artists:", error);
       $("#artistContainer").html(

@@ -25,7 +25,7 @@
                 type="text"
                 id="searchInput"
                 class="form-control float-right"
-                placeholder="Search by title"
+                placeholder="Search here..."
               />
               <div class="input-group-append">
                 <button type="button" class="btn btn-default" id="searchBtn">
@@ -49,6 +49,13 @@
               </tr>
             </thead>
             <tbody id="music-table-body"></tbody>
+            <tbody id="no-results" style="display: none">
+              <tr>
+                <td colspan="6" style="text-align: center; color: red">
+                  No match found
+                </td>
+              </tr>
+            </tbody>
           </table>
         </div>
       </div>
@@ -88,47 +95,63 @@
       return `${mins}:${secs}`;
     }
 
-    function fetchAllMusics(searchQuery = "") {
+    function filterSongsByRegex(searchQuery, musicData) {
+      const $tbody = $("#music-table-body");
+      const $noResults = $("#no-results");
+      $tbody.empty();
+      $noResults.hide();
+
+      const regex = new RegExp(searchQuery, "i");
+
+      let matchedCount = 0;
+
+      musicData.forEach((music) => {
+        if (regex.test(music.title)) {
+          const releaseDate = music.releaseDate
+            ? music.releaseDate.split("T")[0]
+            : "N/A";
+
+          const row = `
+      <tr>
+        <td>${music.title}</td>
+        <td>${releaseDate}</td>
+        <td><span class="tag tag-success">${music.likesCount ?? 0}</span></td>
+        <td>${music.singer ?? "Unknown"}</td>
+        <td>${formatLength(music.length)}</td>
+        <td>
+          <button type="button" class="btn btn-primary" data-id="${music._id}">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button type="button" class="btn btn-danger delete-btn" data-id="${
+            music._id
+          }">
+            <i class="fas fa-trash" aria-hidden="true"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+          $tbody.append(row);
+          matchedCount++;
+        }
+      });
+
+      // Show "No match found" message if nothing matches
+      if (matchedCount === 0) {
+        $noResults.show();
+      }
+    }
+
+    let allSongs = []; // global cache
+
+    function fetchAllMusics() {
       axios
-        .get("/admin/songs", {
-          params: { title: searchQuery },
-        })
+        .get("/admin/songs")
         .then((response) => {
-          const musicData = response.data;
-          const $tbody = $("#music-table-body");
-          $tbody.empty();
-
-          musicData.forEach((music) => {
-            const releaseDate = music.releaseDate
-              ? music.releaseDate.split("T")[0]
-              : "N/A";
-
-            const row = `
-          <tr>
-            <td>${music.title}</td>
-            <td>${releaseDate}</td>
-            <td><span class="tag tag-success">${
-              music.likesCount ?? 0
-            }</span></td>
-            <td>${music.singer ?? "Unknown"}</td>
-            <td>${formatLength(music.length)}</td>
-            <td>
-                   <button type="button" class="btn  btn-primary" data-id="${
-                     music._id
-                   }"> <i class="fas fa-edit"></i></button>
-              <button type="button" class="btn btn-danger delete-btn" data-id="${
-                music._id
-              }">
-                <i class="fas fa-trash" aria-hidden="true"></i>
-              </button>
-            </td>
-          </tr>
-        `;
-            $tbody.append(row);
-          });
+          allSongs = response.data;
+          filterSongsByRegex($("#searchInput").val(), allSongs);
         })
         .catch((error) => {
-          console.error("Failed to fetch musics:", error);
+          console.error("❌ Failed to fetch musics:", error);
         });
     }
 
@@ -153,18 +176,16 @@
     });
 
     $(document).ready(() => {
+      fetchCounts();
       fetchAllMusics();
 
-      $("#searchBtn").on("click", () => {
-        const searchTerm = $("#searchInput").val().trim();
-        fetchAllMusics(searchTerm);
+      // Live filtering on every keystroke
+      $("#searchInput").on("input", function () {
+        const searchTerm = $(this).val().trim();
+        filterSongsByRegex(searchTerm, allSongs);
       });
 
-      $("#searchInput").on("keypress", function (e) {
-        if (e.which === 13) {
-          $("#searchBtn").click();
-        }
-      });
+      setInterval(fetchCounts, 30000);
     });
   </script>
 </div>

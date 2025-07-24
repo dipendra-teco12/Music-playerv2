@@ -18,6 +18,7 @@ const {
   getUniqueArtists,
   getUniquePlaylists,
 } = require("../services/adminServices");
+const User = require("../Models/user.Model");
 
 const uploadSong = async (req, res) => {
   try {
@@ -184,6 +185,140 @@ const addAlbum = async (req, res) => {
     });
   } catch (error) {
     console.error("Upload song error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const updateSong = async (req, res) => {
+  try {
+    const songId = req.params.id;
+    const {
+      title,
+      artistName,
+      albumName,
+      length,
+      genre,
+      playlist,
+      releaseDate,
+      description,
+    } = req.body;
+
+    // Basic validation
+    if (!title || !genre || !releaseDate) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    // Find existing song
+    const song = await Music.findById(songId);
+    if (!song) {
+      return res.status(404).json({ message: "Song not found" });
+    }
+
+    // Update song fields
+    song.title = title;
+    song.length = length;
+    song.genre = genre;
+    song.releaseDate = releaseDate;
+    song.description = description;
+
+    // Update media files if new uploaded
+    if (req.files?.songImage) {
+      song.songImage = req.files.songImage[0].path;
+      song.songImagePublicId = req.files.songImage[0].filename;
+    }
+    if (req.files?.audioFile) {
+      song.audioFile = req.files.audioFile[0].path;
+      song.audioFilePublicId = req.files.audioFile[0].filename;
+    }
+
+    await song.save();
+
+    // 1️⃣ Handle the Album association
+    const normAlbum = albumName?.trim().toLowerCase();
+    const currentAlbum = await Album.findOne({ albumSong: song._id });
+    let targetAlbum = currentAlbum;
+
+    if (normAlbum) {
+      // if song already in a different album, remove it
+      if (currentAlbum && currentAlbum.albumName.toLowerCase() !== normAlbum) {
+        currentAlbum.albumSong.pull(song._id);
+        await currentAlbum.save();
+        targetAlbum = null;
+      }
+
+      if (!targetAlbum) {
+        targetAlbum = await Album.findOne({
+          albumName: { $regex: `^${normAlbum}$`, $options: "i" },
+        });
+      }
+
+      if (targetAlbum) {
+        if (!targetAlbum.albumSong.includes(song._id)) {
+          targetAlbum.albumSong.push(song._id);
+          await targetAlbum.save();
+        }
+      } else {
+        const albumImage =
+          req.files?.albumImage?.[0]?.path || DEFAULT_ALBUM_IMAGE;
+        targetAlbum = await Album.create({
+          albumName: albumName.trim(),
+          albumImage,
+          albumSong: [song._id],
+        });
+      }
+    }
+
+    // 2️⃣ Handle the Artist association
+    const normArtist = artistName?.trim().toLowerCase();
+    const currentArtist = await Artist.findOne({ artistSong: song._id });
+    let targetArtist = currentArtist;
+
+    if (normArtist) {
+      if (
+        currentArtist &&
+        currentArtist.artistName.toLowerCase() !== normArtist
+      ) {
+        currentArtist.artistSong.pull(song._id);
+        currentArtist.artistAlbum.pull(targetAlbum?._id);
+        await currentArtist.save();
+        targetArtist = null;
+      }
+
+      if (!targetArtist) {
+        targetArtist = await Artist.findOne({
+          artistName: { $regex: `^${normArtist}$`, $options: "i" },
+        });
+      }
+
+      if (targetArtist) {
+        if (!targetArtist.artistSong.includes(song._id))
+          targetArtist.artistSong.push(song._id);
+        if (targetAlbum && !targetArtist.artistAlbum.includes(targetAlbum._id))
+          targetArtist.artistAlbum.push(targetAlbum._id);
+        await targetArtist.save();
+      } else {
+        const artistImage =
+          req.files?.artistImage?.[0]?.path || DEFAULT_ARTIST_IMAGE;
+        await Artist.create({
+          artistName: artistName.trim(),
+          artistImage,
+          artistSong: [song._id],
+          artistAlbum: targetAlbum ? [targetAlbum._id] : [],
+        });
+      }
+    }
+
+    // 3️⃣ Handle Playlist update
+    if (playlist) {
+      await addSongToPlaylist(playlist, song._id);
+    }
+
+    return res.status(200).json({
+      message: "Song updated successfully",
+      song,
+    });
+  } catch (error) {
+    console.error("Update song error:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -483,9 +618,65 @@ const deletePlaylist = async (req, res) => {
   }
 };
 
+const getSongData = async (songId) => {
+  try {
+    let songData = null;
+    if (songId) {
+      songData = await Music.findById(songId);
+      if (!songData) return res.status(404).json({ message: "Song not found" });
+
+      const playlists = await Playlist.find({ playlistSong: songId }).select(
+        "playlistName"
+      );
+      const albums = await Album.find({ albumSong: songId }).select(
+        "albumName"
+      );
+      const artists = await Artist.find({ artistSong: songId }).select(
+        "artistName"
+      );
+
+      const playlistNames = playlists.map((p) => p.playlistName);
+      const albumNames = albums.map((a) => a.albumName);
+      const artistNames = artists.map((a) => a.artistName);
+
+      const song = {
+        songId: songData._id,
+        title: songData.title,
+        genre: songData.genre,
+        length: songData.length,
+        releaseDate: songData.releaseDate.toISOString().slice(0, 10),
+        description: songData.description,
+        playlistNames,
+        albumNames,
+        artistNames,
+      };
+
+      return song;
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+const getAllUsers = async (req, res, next) => {
+  try {
+    const users = await User.find().select("fullName email role");
+    if (users.length === 0) {
+      res.status(200).json({ message: "did not found any user" });
+    }
+
+    req.primeusers = users;
+    next();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 module.exports = {
   uploadSong,
   addAlbum,
+  updateSong,
   dashboardCount,
   getAllSongs,
   deleteSong,
@@ -498,4 +689,7 @@ module.exports = {
   artistAlbums,
   deleteAlbum,
   deletePlaylist,
+  getSongData,
+
+  getAllUsers,
 };

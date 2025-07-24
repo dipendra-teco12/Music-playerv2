@@ -17,6 +17,25 @@
   </div>
 
   <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">All Songs</h3>
+
+      <div class="card-tools">
+        <div class="input-group input-group-sm" style="width: 150px">
+          <input
+            type="text"
+            id="searchInput"
+            class="form-control float-right"
+            placeholder="Search here..."
+          />
+          <div class="input-group-append">
+            <button type="button" class="btn btn-default" id="searchBtn">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="card-body table-responsive p-0">
       <table class="table table-hover text-nowrap">
         <thead>
@@ -30,6 +49,13 @@
           </tr>
         </thead>
         <tbody id="music-table-body"></tbody>
+        <tbody id="no-results" style="display: none">
+          <tr>
+            <td colspan="6" style="text-align: center; color: red">
+              No match found
+            </td>
+          </tr>
+        </tbody>
       </table>
     </div>
   </div>
@@ -42,6 +68,49 @@
       const m = Math.floor(sec / 60),
         s = ("0" + (sec % 60)).slice(-2);
       return `${m}:${s}`;
+    }
+    let allAlbumSongs = []; // global cache for filtering
+
+    function filterSongsByRegex(query) {
+      const $tbody = $("#music-table-body").empty();
+      const $noResults = $("#no-results").hide();
+
+      const regex = new RegExp(query, "i");
+      let matchCount = 0;
+
+      allAlbumSongs.forEach((song) => {
+        const titleMatch = regex.test(song.title);
+        const genreMatch = regex.test(song.genre ?? "");
+
+        if (titleMatch || genreMatch) {
+          const date = song.releaseDate
+            ? song.releaseDate.split("T")[0]
+            : "N/A";
+          const row = `
+        <tr>
+          <td>${song.title}</td>
+          <td>${date}</td>
+          <td><span class="tag tag-success">${song.likesCount ?? 0}</span></td>
+          <td>${song.genre ?? "Unknown"}</td>
+          <td>${formatLength(song.length)}</td>
+          <td>
+            <button type="button" class="btn btn-primary" data-id="${song._id}">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-danger delete-btn" data-id="${song._id}">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+          $tbody.append(row);
+          matchCount++;
+        }
+      });
+
+      if (matchCount === 0) {
+        $noResults.show();
+      }
     }
 
     $(async function () {
@@ -63,6 +132,8 @@
 
         const $tbody = $("#music-table-body").empty();
         const songs = data.songs || [];
+        allAlbumSongs = songs; // store globally for search
+
         const artist = data.artistName;
 
         if (!songs.length) {
@@ -112,6 +183,13 @@
       } catch {
         alert("Delete failed.");
       }
+    });
+
+    $(document).ready(() => {
+      $("#searchInput").on("input", function () {
+        const value = $(this).val().trim();
+        filterSongsByRegex(value);
+      });
     });
   </script>
 </div>

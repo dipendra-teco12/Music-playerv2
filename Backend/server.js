@@ -4,7 +4,8 @@ const app = express();
 const expressLayouts = require("express-ejs-layouts");
 const passport = require("passport");
 const connectDB = require("./config/db");
-
+const methodOverride = require("method-override");
+app.use(methodOverride("_method"));
 require("dotenv").config({ quiet: true });
 require("./config/oauth");
 
@@ -57,4 +58,18 @@ app.use("/api/song", songRoutes);
 
 connectDB();
 
-app.listen(port, () => console.log(`Running on http://localhost:${port}`));
+app.listen(port, () => {
+  const os = require("os");
+  const interfaces = os.networkInterfaces();
+
+  let ip = "localhost"; // default
+  for (const name in interfaces) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === "IPv4" && !iface.internal) {
+        ip = iface.address;
+      }
+    }
+  }
+
+  console.log(`Server is running at http://${ip}:${port}`);
+});

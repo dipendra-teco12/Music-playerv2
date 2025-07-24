@@ -1,7 +1,11 @@
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
-  googleId: { type: String, unique: true },
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true,
+  },
   fullName: {
     type: String,
     required: true,
@@ -15,8 +19,8 @@ const userSchema = new mongoose.Schema({
     type: String,
     validate: {
       validator: function (v) {
-        if (this.googleId) return true; // skip for Google users
-        return v && v.length >= 6; // enforce a password otherwise
+        if (this.googleId) return true; 
+        return v && v.length >= 8; 
       },
       message: "Password is required for local signups",
     },

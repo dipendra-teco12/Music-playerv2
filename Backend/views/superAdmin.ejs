@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Super Admin - User Management</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container py-4">
+
+  <h1>User Management</h1>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Name</th><th>Email</th><th>Role</th><th>Edit</th><th>Delete</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% users.forEach(user => { %>
+        <tr>
+          <td><%= user.fullName %></td>
+          <td><%= user.email %></td>
+          <td><%= user.role %></td>
+          <td>
+            <form method="POST" action="/admin/super-admin/<%= user._id %>?_method=PUT" class="d-flex">
+              <select name="role" class="form-select form-select-sm me-2">
+                <% ['user','admin','superAdmin'].forEach(r => { %>
+                  <option value="<%=r%>" <%= user.role === r ? 'selected' : '' %>><%= r %></option>
+                <% }) %>
+              </select>
+              <button class="btn btn-sm btn-primary">Save</button>
+            </form>
+          </td>
+          <td>
+            <form method="POST" action="/admin/super-admin/<%= user._id %>?_method=DELETE" onsubmit="return confirm('Delete user <%= user.fullName %>?');">
+              <button class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+</body>
+</html>

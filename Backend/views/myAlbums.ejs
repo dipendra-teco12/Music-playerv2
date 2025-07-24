@@ -88,6 +88,11 @@ const artist = artistMap.get(album._id.toString());
 
           $("#albumContainer").append(cardHTML);
         });
+          if (!uniqueAlbums.length) {
+          $("#albumContainer").html(
+            '<p class="text-muted">No Album found.</p>'
+          );
+        }
       } catch (error) {
         console.error("Error fetching albums:", error);
         $("#albumContainer").html(

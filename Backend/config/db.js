@@ -4,6 +4,7 @@ const uri = process.env.MONGO_URI;
 const connectDB = async () => {
   try {
     const connect = await mongoose.connect(`${uri}`);
+
     console.log(`mongdb connected ${connect.connection.host} `);
   } catch (error) {
     console.log(`mongodb connection failed`);

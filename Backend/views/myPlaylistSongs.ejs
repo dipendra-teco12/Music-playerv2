@@ -17,6 +17,25 @@
   </div>
 
   <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">All Songs</h3>
+
+      <div class="card-tools">
+        <div class="input-group input-group-sm" style="width: 150px">
+          <input
+            type="text"
+            id="searchInput"
+            class="form-control float-right"
+            placeholder="Search here..."
+          />
+          <div class="input-group-append">
+            <button type="button" class="btn btn-default" id="searchBtn">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="card-body table-responsive p-0">
       <table class="table table-hover text-nowrap">
         <thead>
@@ -30,6 +49,13 @@
           </tr>
         </thead>
         <tbody id="song-table-body"></tbody>
+        <tbody id="no-results" style="display: none">
+          <tr>
+            <td colspan="6" style="text-align: center; color: red">
+              No match found
+            </td>
+          </tr>
+        </tbody>
       </table>
     </div>
   </div>
@@ -43,6 +69,46 @@
         s = ("0" + (secs % 60)).slice(-2);
       return `${m}:${s}`;
     };
+    let allPlaylistSongs = [];
+    function filterPlaylistSongs(query) {
+      const $tbody = $("#song-table-body").empty();
+      const $noResults = $("#no-results").hide();
+
+      const regex = new RegExp(query, "i");
+      let matchCount = 0;
+
+      allPlaylistSongs.forEach((s) => {
+        const titleMatch = regex.test(s.title);
+        const genreMatch = regex.test(s.genre ?? "");
+
+        if (titleMatch || genreMatch) {
+          const date = s.releaseDate ? s.releaseDate.split("T")[0] : "N/A";
+          const row = `
+        <tr>
+          <td>${s.title}</td>
+          <td>${date}</td>
+          <td>${s.likesCount ?? 0}</td>
+          <td>${s.genre ?? "Unknown"}</td>
+          <td>${fmtLen(s.length)}</td>
+          <td>
+            <button type="button" class="btn btn-primary" data-id="${s._id}">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-danger del" data-id="${s._id}">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+          $tbody.append(row);
+          matchCount++;
+        }
+      });
+
+      if (matchCount === 0) {
+        $noResults.show();
+      }
+    }
 
     $(async function () {
       const pid = new URLSearchParams(window.location.search).get("playlistId");
@@ -63,7 +129,7 @@
             "<tr><td colspan=6>No songs in this playlist.</td></tr>"
           );
         }
-
+        allPlaylistSongs = data.songs;
         data.songs.forEach((s) => {
           const date = s.releaseDate ? s.releaseDate.split("T")[0] : "N/A";
           const row = `
@@ -100,6 +166,13 @@
       } catch {
         alert("Delete failed");
       }
+    });
+
+    $(document).ready(function () {
+      $("#searchInput").on("input", function () {
+        const val = $(this).val().trim();
+        filterPlaylistSongs(val);
+      });
     });
   </script>
 </div>

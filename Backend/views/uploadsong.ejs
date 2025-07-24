@@ -14,11 +14,19 @@
   </div>
 
   <section class="content">
-    <form id="uploadForm" enctype="multipart/form-data">
+    <style>
+      .error-message {
+        color: red;
+        font-size: 0.9em;
+        margin-top: 2px;
+      }
+    </style>
+
+    <form id="uploadForm" enctype="multipart/form-data" novalidate>
       <div class="card-body">
+        <!-- Song Title -->
         <div class="row">
           <div class="col-sm-6">
-            <!-- text input -->
             <div class="form-group">
               <label for="title"
                 >Song title <span style="color: red">*</span></label
@@ -26,15 +34,13 @@
               <input
                 type="text"
                 class="form-control"
-                placeholder="Enter ..."
-                name="title"
-                title="title"
                 id="title"
+                name="title"
                 required
               />
+              <div class="error-message" id="titleError"></div>
             </div>
           </div>
-
           <div class="col-sm-6">
             <div class="form-group">
               <label for="songImage">Song image</label>
@@ -44,27 +50,32 @@
                   class="custom-file-input"
                   id="songImage"
                   name="songImage"
+                  accept="image/*"
                 />
                 <label class="custom-file-label" for="songImage"
                   >Choose file</label
                 >
               </div>
+              <div class="error-message" id="songImageError"></div>
             </div>
           </div>
         </div>
 
+        <!-- Artist -->
         <div class="row">
           <div class="col-sm-6">
-            <!-- text input -->
             <div class="form-group">
-              <label for="artistName">Artist Name</label>
+              <label for="artistName"
+                >Artist Name<span style="color: red">*</span></label
+              >
               <input
                 type="text"
                 class="form-control"
-                placeholder="Enter ..."
-                name="artistName"
                 id="artistName"
+                name="artistName"
+                required
               />
+              <div class="error-message" id="artistNameError"></div>
             </div>
           </div>
           <div class="col-sm-6">
@@ -76,61 +87,83 @@
                   class="custom-file-input"
                   id="artistImage"
                   name="artistImage"
+                  accept="image/*"
                 />
                 <label class="custom-file-label" for="artistImage"
                   >Choose file</label
                 >
               </div>
+              <div class="error-message" id="artistImageError"></div>
             </div>
           </div>
         </div>
 
+        <!-- Genre & Playlist -->
         <div class="row">
           <div class="col-sm-6">
             <div class="form-group">
-              <label>Genres<span style="color: red">*</span></label>
-              <select class="form-control" id="genreSelect">
+              <label>Genres <span style="color: red">*</span></label>
+              <select
+                class="form-control"
+                id="genreSelect"
+                name="genre"
+                required
+              >
+                <option value="">--Select--</option>
                 <option value="Classic Song">Classic Song</option>
                 <option value="Rap Song">Rap Song</option>
                 <option value="Pop Song">Pop Song</option>
                 <option value="Rock Song">Rock Song</option>
               </select>
+              <div class="error-message" id="genreSelectError"></div>
             </div>
           </div>
           <div class="col-sm-6">
             <div class="form-group">
-              <label>Playlist<span style="color: red">*</span></label>
-              <select class="form-control" id="playlistSelect">
+              <label>Playlist <span style="color: red">*</span></label>
+              <select
+                class="form-control"
+                id="playlistSelect"
+                name="playlist"
+                required
+              >
+                <option value="">--Select--</option>
                 <option value="Chill Playlist">Chill Playlist</option>
                 <option value="Sad Playlist">Sad Playlist</option>
                 <option value="Workout Playlist">Workout Playlist</option>
                 <option value="Love Playlist">Love Playlist</option>
                 <option value="Happy Playlist">Happy Playlist</option>
               </select>
+              <div class="error-message" id="playlistSelectError"></div>
             </div>
           </div>
         </div>
+
+        <!-- Length & Audio -->
         <div class="row">
           <div class="col-sm-6">
             <div class="form-group">
-              <label for="Length">Audio Length</label>
+              <label for="Length">Audio Length (seconds)</label>
               <input
                 type="number"
                 class="form-control"
                 id="Length"
                 name="length"
+                min="1"
+                max="3600"
               />
+              <div class="error-message" id="LengthError"></div>
             </div>
           </div>
           <div class="col-sm-6">
             <div class="form-group">
               <label for="audioFile"
-                >Audio File<span style="color: red">*</span></label
+                >Audio File <span style="color: red">*</span></label
               >
               <div class="custom-file">
                 <input
                   type="file"
-                  class="form-control custom-file-input"
+                  class="custom-file-input"
                   id="audioFile"
                   name="audioFile"
                   accept="audio/*"
@@ -140,14 +173,18 @@
                   >Choose file</label
                 >
               </div>
+              <div class="error-message" id="audioFileError"></div>
             </div>
           </div>
         </div>
 
+        <!-- Release Date & Description -->
         <div class="row">
           <div class="col-sm-6">
             <div class="form-group">
-              <label for="releaseDate">Release Date</label>
+              <label for="releaseDate"
+                >Release Date <span style="color: red">*</span></label
+              >
               <input
                 type="date"
                 class="form-control"
@@ -155,95 +192,278 @@
                 name="releaseDate"
                 required
               />
+              <div class="error-message" id="releaseDateError"></div>
             </div>
           </div>
           <div class="col-sm-6">
-            <!-- textarea -->
             <div class="form-group">
               <label>Description</label>
               <textarea
                 class="form-control"
                 rows="3"
-                placeholder="Enter ..."
                 name="description"
+                id="description"
+              
               ></textarea>
+              <div class="error-message" id="descriptionError"></div>
+              
             </div>
           </div>
-          <!-- <div class="col-sm-6">
-          <div class="form-group">
-            <label for="videoFile">Video File</label>
-            <div class="custom-file">
-              <input
-                type="file"
-                class="form-control"
-                id="videoFile"
-                name="videoFile"
-                accept="video/*"
-              />
-              <label class="custom-file-label" for="videoFile"
-                >Choose file</label
-              >
-            </div>
-          </div>
-        </div> -->
         </div>
 
-        <button type="submit" class="btn btn-primary">Upload</button>
+        <button type="submit" id="submitBtn" class="btn btn-primary">
+          Upload
+        </button>
       </div>
     </form>
   </section>
+
+  <!-- Dependencies -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
   <script>
-    $(document).ready(function () {
+    $(function () {
+      const setError = (id, msg) => $("#" + id + "Error").text(msg || "");
+
+      function validateForm() {
+        let valid = true;
+
+        // Clear all errors first
+        setError("title", "");
+        setError("artistName", "");
+        setError("genreSelect", "");
+        setError("playlistSelect", "");
+        setError("audioFile", "");
+        setError("releaseDate", "");
+        setError("Length", "");
+        setError("songImage", "");
+        setError("artistImage", "");
+        setError("description", "");
+
+        // Song Title validation
+        const title = $("#title").val().trim();
+        if (!title) {
+          setError("title", "Song title is required.");
+          valid = false;
+        } else if (title.length < 2) {
+          setError("title", "Song title must be at least 2 characters long.");
+          valid = false;
+        } else if (title.length > 150) {
+          setError("title", "Song title must not exceed 150 characters.");
+          valid = false;
+        }
+
+        // Artist Name validation
+        const artistName = $("#artistName").val().trim();
+        if (!artistName) {
+          setError("artistName", "Artist name is required.");
+          valid = false;
+        } else if (artistName.length < 2) {
+          setError(
+            "artistName",
+            "Artist name must be at least 2 characters long."
+          );
+          valid = false;
+        } else if (artistName.length > 100) {
+          setError("artistName", "Artist name must not exceed 100 characters.");
+          valid = false;
+        }
+
+        // Genre validation
+        if (!$("#genreSelect").val()) {
+          setError("genreSelect", "Please select a genre.");
+          valid = false;
+        }
+
+        // Playlist validation
+        if (!$("#playlistSelect").val()) {
+          setError("playlistSelect", "Please select a playlist.");
+          valid = false;
+        }
+
+        // Audio File validation
+        const af = $("#audioFile")[0].files[0];
+        const mode = $("#uploadForm").attr("data-mode") || "create";
+        if (mode === "create" && !af) {
+          setError("audioFile", "Audio file is required.");
+          valid = false;
+        } else if (af) {
+          if (!af.type.startsWith("audio/")) {
+            setError("audioFile", "Please select a valid audio file.");
+            valid = false;
+          }
+          // Check file size (50MB limit)
+          if (af.size > 50 * 1024 * 1024) {
+            setError("audioFile", "Audio file size must not exceed 50MB.");
+            valid = false;
+          }
+
+          // Check specific audio formats
+          const allowedAudioTypes = [
+            "audio/mpeg",
+            "audio/mp3",
+            "audio/wav",
+            "audio/m4a",
+            "audio/aac",
+            "audio/ogg",
+          ];
+          if (!allowedAudioTypes.includes(af.type)) {
+            setError(
+              "audioFile",
+              "Please select a valid audio file (MP3, WAV, M4A, AAC, OGG)."
+            );
+            valid = false;
+          }
+        }
+
+        // Release Date validation
+        const rd = $("#releaseDate").val();
+        if (!rd) {
+          setError("releaseDate", "Release date is required.");
+          valid = false;
+        } else {
+          const selectedDate = new Date(rd);
+          const today = new Date();
+          const maxDate = new Date();
+          maxDate.setFullYear(today.getFullYear() + 1);
+
+          if (selectedDate > maxDate) {
+            setError(
+              "releaseDate",
+              "Release date cannot be more than 1 year in the future."
+            );
+            valid = false;
+          }
+        }
+
+        // Audio Length validation
+        const len = $("#Length").val();
+        if (len && (isNaN(len) || len <= 0 || len > 3600)) {
+          setError(
+            "Length",
+            "Audio length must be a positive number (max 3600 seconds)."
+          );
+          valid = false;
+        }
+
+        // Image file validations
+        const imageFields = ["songImage", "artistImage"];
+        imageFields.forEach((fieldId) => {
+          const file = $("#" + fieldId)[0].files[0];
+          if (file) {
+            // Check file type
+            if (!file.type.startsWith("image/")) {
+              setError(fieldId, "Please select a valid image file.");
+              valid = false;
+            }
+            // Check file size (5MB limit)
+            if (file.size > 5 * 1024 * 1024) {
+              setError(fieldId, "Image file size must not exceed 5MB.");
+              valid = false;
+            }
+
+            // Check specific image formats
+            const allowedImageTypes = [
+              "image/jpeg",
+              "image/jpg",
+              "image/png",
+              "image/gif",
+              "image/webp",
+            ];
+            if (!allowedImageTypes.includes(file.type)) {
+              setError(
+                fieldId,
+                "Please select a valid image file (JPEG, PNG, GIF, WebP)."
+              );
+              valid = false;
+            }
+          }
+        });
+
+        // Description validation
+        const description = $("#description").val();
+        if (description && description.length > 500) {
+          setError(
+            "description",
+            "Description must not exceed 500 characters."
+          );
+          valid = false;
+        }
+
+        return valid;
+      }
+
+      // Clear errors on input
+      $("#uploadForm input, #uploadForm select, #uploadForm textarea").on(
+        "input change",
+        function () {
+          const fieldId = this.id;
+          setError(fieldId, "");
+        }
+      );
+
+      $(".custom-file-input").on("change", function () {
+        const names = Array.from(this.files)
+          .map((f) => f.name)
+          .join(", ");
+        $(this)
+          .siblings(".custom-file-label")
+          .text(names || "Choose file");
+
+        // Clear error when file is selected
+        const fieldId = this.id;
+        setError(fieldId, "");
+      });
+
       $("#uploadForm").on("submit", async function (e) {
         e.preventDefault();
+        if (!validateForm()) {
+          // Scroll to first error
+          const firstErrorField = $(".error-message")
+            .filter(function () {
+              return $(this).text().length > 0;
+            })
+            .first();
+          if (firstErrorField.length) {
+            firstErrorField[0].scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+          }
+          return;
+        }
 
-        const $form = $(this);
-        const $btn = $form.find("button[type=submit]");
-
-        
-        $btn.prop("disabled", true).text("Uploading…");
-
+        const btn = $("#submitBtn").prop("disabled", true).text("Uploading...");
         const formData = new FormData(this);
-        formData.append("genre", $("#genreSelect").val());
-        formData.append("playlist", $("#playlistSelect").val());
+
+        // Remove any existing genre and playlist entries to avoid duplicates
+        formData.delete("genre");
+        formData.delete("playlist");
+
+        // Set single values for genre and playlist
+        formData.set("genre", $("#genreSelect").val());
+        formData.set("playlist", $("#playlistSelect").val());
 
         try {
-          const response = await axios.post("/admin/upload", formData, {
+          const res = await axios.post("/admin/upload", formData, {
             headers: { "Content-Type": "multipart/form-data" },
             withCredentials: true,
           });
+          alert("Song uploaded successfully!");
+          this.reset();
+          $(".custom-file-label").text("Choose file");
 
-          if (response.status === 200) {
-            alert("Song uploaded successfully!");
-
-            this.reset();
-
-
-            $form.find(".custom-file-label").text("Choose file");
-          }
-        } catch (error) {
-          console.error(
-            "Upload error:",
-            error.response?.data || error.message || error
-          );
-          alert(error.response?.data?.message || "Failed to upload song.");
+          // Reset select dropdowns
+          $("#genreSelect").val("");
+          $("#playlistSelect").val("");
+        } catch (err) {
+          const msg = err.response?.data?.message || "Upload failed";
+          alert(msg);
+          console.error(err);
         } finally {
-
-          $btn.prop("disabled", false).text("Upload");
+          btn.prop("disabled", false).text("Upload");
         }
-      });
-
-      $(".custom-file-input").on("change", function () {
-        const fileName =
-          this.files.length > 1
-            ? Array.from(this.files)
-                .map((f) => f.name)
-                .join(", ")
-            : this.files[0]?.name || "Choose file";
-        $(this).siblings(".custom-file-label").text(fileName);
       });
     });
   </script>

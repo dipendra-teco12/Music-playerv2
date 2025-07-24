@@ -1,6 +1,8 @@
 const Music = require("../Models/music.Model");
 const FavoriteSong = require("../Models/favoriteSong.Model");
 const LikedSong = require("../Models/likedSong.Model");
+const Playlist = require("../Models/playlist.Model");
+const Album = require("../Models/album.Model");
 
 const addFavoriteSong = async (req, res) => {
   try {
@@ -62,21 +64,34 @@ const getSong = async (req, res) => {
   try {
     const { songId } = req.params;
     if (!songId) {
-      return res.status(404).json({ message: "songId is missing" });
+      return res.status(400).json({ message: "songId is missing" });
     }
+
     const song = await Music.findById(songId);
+    if (!song) return res.status(404).json({ message: "Song not found" });
 
-    if (!song) return res.sendStatus(404);
+    const playlists = await Playlist.find({ playlistSong: songId }).select(
+      "playlistName"
+    );
+    const albums = await Album.find({ albumSong: songId }).select("albumName");
 
-    res.status(200).json({
+    const playlistNames = playlists.map((p) => p.playlistName);
+    const albumNames = albums.map((a) => a.albumName);
+
+    return res.status(200).json({
       message: "song successfully fetched",
       songId: song._id,
       title: song.title,
-      audioUrl: song.audioFile,
+      genre: song.genre,
+      length: song.length,
+      releaseDate: song.releaseDate,
+      description: song.description,
+      playlistNames,
+      albumNames,
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Internal Server Error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
