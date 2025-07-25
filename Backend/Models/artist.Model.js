@@ -8,7 +8,8 @@ const artistSchema = new mongoose.Schema(
     },
     artistImage: {
       type: String,
-      default: "",
+      default:
+        "https://res.cloudinary.com/dfciwmday/image/upload/v1753418817/MusicApp/defaults/artist1_lykttl.jpg",
     },
     artistSong: [
       {

@@ -8,6 +8,8 @@ const musicSchema = new mongoose.Schema(
     },
     songImage: {
       type: String,
+      default:
+        "https://res.cloudinary.com/dfciwmday/image/upload/v1752668321/MusicApp/Images/songImage_gz8nht.jpg",
     },
     songImagePublicId: String,
     genre: {

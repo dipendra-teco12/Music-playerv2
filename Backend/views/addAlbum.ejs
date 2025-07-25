@@ -433,10 +433,25 @@ $(document).ready(function () {
           valid = false;
         }
         // Check file size (5MB limit)
-        if (file.size > 3 * 1024 * 1024) {
+        if (file.size > 5 * 1024 * 1024) {
           setError(fieldId, "Image file size must not exceed 5MB.");
           valid = false;
         }
+          // Check specific image formats
+            const allowedImageTypes = [
+              "image/jpeg",
+              "image/jpg",
+              "image/png",
+              "image/gif",
+              "image/webp",
+            ];
+            if (!allowedImageTypes.includes(file.type)) {
+              setError(
+                fieldId,
+                "Please select a valid image file (JPEG, PNG, GIF, WebP)."
+              );
+              valid = false;
+            }
       }
     });
 

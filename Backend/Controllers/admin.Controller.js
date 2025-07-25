@@ -3,14 +3,9 @@ const Music = require("../Models/music.Model");
 const Artist = require("../Models/artist.Model");
 const Album = require("../Models/album.Model");
 const Playlist = require("../Models/playlist.Model");
+const User = require("../Models/user.Model");
 
 const mongoose = require("mongoose");
-const DEFAULT_SONG_IMAGE =
-  "https://res.cloudinary.com/dfciwmday/image/upload/v1752668321/MusicApp/Images/songImage_gz8nht.jpg";
-const DEFAULT_ARTIST_IMAGE =
-  "https://res.cloudinary.com/dfciwmday/image/upload/v1752668321/MusicApp/Images/artistimages_mq00py.webp";
-const DEFAULT_ALBUM_IMAGE =
-  "https://res.cloudinary.com/dfciwmday/image/upload/v1752668322/MusicApp/Images/albumImage_quzow6.jpg";
 
 const {
   addSongToPlaylist,
@@ -18,7 +13,6 @@ const {
   getUniqueArtists,
   getUniquePlaylists,
 } = require("../services/adminServices");
-const User = require("../Models/user.Model");
 
 const uploadSong = async (req, res) => {
   try {
@@ -36,11 +30,11 @@ const uploadSong = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    const songImage = req.files?.songImage?.[0]?.path || DEFAULT_SONG_IMAGE;
+    const songImage = req.files?.songImage?.[0]?.path ;
     const songImagePublicId = req.files?.songImage?.[0]?.filename;
 
     const artistImage =
-      req.files?.artistImage?.[0]?.path || DEFAULT_ARTIST_IMAGE;
+      req.files?.artistImage?.[0]?.path ;
 
     const audioFile = req.files?.audioFile?.[0]?.path;
     const audioFilePublicId = req.files?.audioFile?.[0]?.filename;
@@ -49,7 +43,7 @@ const uploadSong = async (req, res) => {
       return res.status(400).json({ message: "Missing audio file" });
     }
 
-    // Create the song
+  
     const songdata = await Music.create({
       title,
       length,
@@ -62,7 +56,7 @@ const uploadSong = async (req, res) => {
       audioFilePublicId,
     });
 
-    // Normalize and check artist
+
     if (artistName) {
       const normalizedName = artistName.trim().toLowerCase();
 
@@ -113,11 +107,11 @@ const addAlbum = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    const songImage = req.files?.songImage?.[0]?.path || DEFAULT_SONG_IMAGE;
+    const songImage = req.files?.songImage?.[0]?.path ;
     const songImagePublicId = req.files?.songImage?.[0]?.filename;
     const artistImage =
-      req.files?.artistImage?.[0]?.path || DEFAULT_ARTIST_IMAGE;
-    const albumImage = req.files?.albumImage?.[0]?.path || DEFAULT_ALBUM_IMAGE;
+      req.files?.artistImage?.[0]?.path ;
+    const albumImage = req.files?.albumImage?.[0]?.path ;
     const audioFile = req.files?.audioFile?.[0]?.path;
     const audioFilePublicId = req.files?.audioFile?.[0]?.filename;
 
@@ -203,25 +197,24 @@ const updateSong = async (req, res) => {
       description,
     } = req.body;
 
-    // Basic validation
+    
     if (!title || !genre || !releaseDate) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // Find existing song
     const song = await Music.findById(songId);
     if (!song) {
       return res.status(404).json({ message: "Song not found" });
     }
 
-    // Update song fields
+  
     song.title = title;
     song.length = length;
     song.genre = genre;
     song.releaseDate = releaseDate;
     song.description = description;
 
-    // Update media files if new uploaded
+    
     if (req.files?.songImage) {
       song.songImage = req.files.songImage[0].path;
       song.songImagePublicId = req.files.songImage[0].filename;
@@ -233,7 +226,7 @@ const updateSong = async (req, res) => {
 
     await song.save();
 
-    // 1️⃣ Handle the Album association
+  
     const normAlbum = albumName?.trim().toLowerCase();
     const currentAlbum = await Album.findOne({ albumSong: song._id });
     let targetAlbum = currentAlbum;
@@ -259,7 +252,7 @@ const updateSong = async (req, res) => {
         }
       } else {
         const albumImage =
-          req.files?.albumImage?.[0]?.path || DEFAULT_ALBUM_IMAGE;
+          req.files?.albumImage?.[0]?.path ;
         targetAlbum = await Album.create({
           albumName: albumName.trim(),
           albumImage,
@@ -298,7 +291,7 @@ const updateSong = async (req, res) => {
         await targetArtist.save();
       } else {
         const artistImage =
-          req.files?.artistImage?.[0]?.path || DEFAULT_ARTIST_IMAGE;
+          req.files?.artistImage?.[0]?.path ;
         await Artist.create({
           artistName: artistName.trim(),
           artistImage,
@@ -308,7 +301,6 @@ const updateSong = async (req, res) => {
       }
     }
 
-    // 3️⃣ Handle Playlist update
     if (playlist) {
       await addSongToPlaylist(playlist, song._id);
     }
