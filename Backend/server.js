@@ -62,7 +62,7 @@ app.listen(port, () => {
   const os = require("os");
   const interfaces = os.networkInterfaces();
 
-  let ip = "localhost"; // default
+  let ip = "localhost";
   for (const name in interfaces) {
     for (const iface of interfaces[name]) {
       if (iface.family === "IPv4" && !iface.internal) {

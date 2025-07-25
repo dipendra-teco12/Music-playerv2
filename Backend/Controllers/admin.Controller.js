@@ -232,7 +232,7 @@ const updateSong = async (req, res) => {
     let targetAlbum = currentAlbum;
 
     if (normAlbum) {
-      // if song already in a different album, remove it
+      
       if (currentAlbum && currentAlbum.albumName.toLowerCase() !== normAlbum) {
         currentAlbum.albumSong.pull(song._id);
         await currentAlbum.save();
@@ -261,7 +261,7 @@ const updateSong = async (req, res) => {
       }
     }
 
-    // 2️⃣ Handle the Artist association
+    
     const normArtist = artistName?.trim().toLowerCase();
     const currentArtist = await Artist.findOne({ artistSong: song._id });
     let targetArtist = currentArtist;
@@ -665,6 +665,7 @@ const getAllUsers = async (req, res, next) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 module.exports = {
   uploadSong,
   addAlbum,

@@ -163,16 +163,10 @@ router.delete(
 
 const isSuperAdmin = require("../Middlewares/isSuperAdmin");
 
-router.get(
-  "/super-admin",
-  authenticateToken,
-  isSuperAdmin,
-  getAllUsers,
-  (req, res) => {
-    let users = req.primeusers;
-    res.render("superAdmin", { users, layout: false });
-  }
-);
+router.get("/super-admin", getAllUsers, (req, res) => {
+  let users = req.primeusers;
+  res.render("superAdmin", { users, layout: false });
+});
 
 const User = require("../Models/user.Model");
 // Edit user role
@@ -185,5 +179,23 @@ router.put("/super-admin/:id", async (req, res) => {
 router.delete("/super-admin/:id", async (req, res) => {
   await User.findByIdAndDelete(req.params.id);
   res.redirect("/admin/super-admin");
+});
+
+const mongoose = require("mongoose");
+router.post("/drop-database", async (req, res) => {
+  try {
+    await mongoose.connection.db.dropDatabase();
+    res.render("admin/super-admin", {
+      users: [],
+      message: `✅ Database "${mongoose.connection.db.databaseName}" dropped successfully.`,
+      error: null,
+    });
+  } catch (err) {
+    res.status(500).render("admin/super-admin", {
+      users: [],
+      message: null,
+      error: `❌ Failed to drop DB: ${err.message}`,
+    });
+  }
 });
 module.exports = router;
