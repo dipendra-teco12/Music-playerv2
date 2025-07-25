@@ -10,7 +10,6 @@ passport.use(
       callbackURL: "/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
-      // TODO: Link profile.id to your user DB
       try {
         // 1. Check if the user already exists
         const email = profile.emails[0].value;

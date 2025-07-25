@@ -7,7 +7,7 @@ const {
   getSong,
   likeSong,
   disLikeSong,
-
+  genre,
 } = require("../Controllers/song.Controller");
 const authenticateToken = require("../Middlewares/authMiddleware");
 
@@ -17,11 +17,12 @@ router.delete("/favorite-song", authenticateToken, removeFavoriteSong);
 
 router.get("/user", authenticateToken, FavoriteSongList);
 
-router.get("/:songId/", authenticateToken, getSong);
-
+router.get("/category", authenticateToken, genre);
+router.get("/:songId", authenticateToken, getSong);
 
 router.post("/like", authenticateToken, likeSong);
 
 router.post("/dislike", authenticateToken, disLikeSong);
+
 
 module.exports = router;

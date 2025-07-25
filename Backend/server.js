@@ -51,25 +51,14 @@ app.get("/", (req, res) => {
   res.render("authViews/login", { layout: false });
 });
 const songRoutes = require("./Routes/songRoutes");
-app.use("/api/auth", authRoute);
 app.use("/auth/google", oauthRoute);
 app.use("/admin", adminRoutes);
+
+app.use("/api/auth", authRoute);
 app.use("/api/song", songRoutes);
 
 connectDB();
 
 app.listen(port, () => {
-  const os = require("os");
-  const interfaces = os.networkInterfaces();
-
-  let ip = "localhost";
-  for (const name in interfaces) {
-    for (const iface of interfaces[name]) {
-      if (iface.family === "IPv4" && !iface.internal) {
-        ip = iface.address;
-      }
-    }
-  }
-
-  console.log(`Server is running at http://${ip}:${port}`);
+  console.log(`Server is running at http://192.168.29.235:${port}`);
 });

@@ -139,6 +139,28 @@ const disLikeSong = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+const genre = async (req, res) => {
+  try {
+    const { genre } = req.query;
+
+    const filter = genre ? { genre: { $regex: genre, $options: "i" } } : {};
+
+    const songs = await Music.find(filter).select(
+      "title genre length audioTile releaseDate songImage"
+    );
+    if (songs.length === 0) {
+      return res.status(404).json({ message: "Not Found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: `${genre} songs fetched successfully`, songs });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Intenal Server Error" });
+  }
+};
 module.exports = {
   addFavoriteSong,
   removeFavoriteSong,
@@ -146,4 +168,5 @@ module.exports = {
   getSong,
   likeSong,
   disLikeSong,
+  genre,
 };

@@ -190,5 +190,10 @@
 
       setInterval(fetchCounts, 30000);
     });
+
+    $(document).on("click", ".btn-primary[data-id]", function () {
+      const songId = $(this).data("id");
+      window.location.href = `/admin/addAlbum?mode=edit&id=${songId}`;
+    });
   </script>
 </div>
