@@ -165,25 +165,28 @@
 
     let matchedCount = 0;
 
-    musicData.forEach((music) => {
-      if (regex.test(music.title)) {
-        const releaseDate = music.releaseDate
-          ? music.releaseDate.split("T")[0]
+    musicData.forEach((song) => {
+      const titleMatch = regex.test(song.title);
+      const singerMatch = regex.test(song.singer ?? "");
+
+      if (titleMatch || singerMatch) {
+        const releaseDate = song.releaseDate
+          ? song.releaseDate.split("T")[0]
           : "N/A";
 
         const row = `
       <tr>
-        <td>${music.title}</td>
+        <td>${song.title}</td>
         <td>${releaseDate}</td>
-        <td><span class="tag tag-success">${music.likesCount ?? 0}</span></td>
-        <td>${music.singer ?? "Unknown"}</td>
-        <td>${formatLength(music.length)}</td>
+        <td><span class="tag tag-success">${song.likesCount ?? 0}</span></td>
+        <td>${song.singer ?? "Unknown"}</td>
+        <td>${formatLength(song.length)}</td>
         <td>
-          <button type="button" class="btn btn-primary" data-id="${music._id}">
+          <button type="button" class="btn btn-primary" data-id="${song._id}">
             <i class="fas fa-edit"></i>
           </button>
           <button type="button" class="btn btn-danger delete-btn" data-id="${
-            music._id
+            song._id
           }">
             <i class="fas fa-trash" aria-hidden="true"></i>
           </button>
