@@ -8,6 +8,10 @@ const {
   likeSong,
   disLikeSong,
   genre,
+  mostViewedSongs,
+  topWeeklySongs,
+  getAllVideoSongs,
+  oldestSongs,
 } = require("../Controllers/song.Controller");
 const authenticateToken = require("../Middlewares/authMiddleware");
 
@@ -18,11 +22,18 @@ router.delete("/favorite-song", authenticateToken, removeFavoriteSong);
 router.get("/user", authenticateToken, FavoriteSongList);
 
 router.get("/category", authenticateToken, genre);
-router.get("/:songId", authenticateToken, getSong);
+router.get("/track/:songId", authenticateToken, getSong);
 
 router.post("/like", authenticateToken, likeSong);
 
 router.post("/dislike", authenticateToken, disLikeSong);
 
+router.get("/most-viewed", authenticateToken, mostViewedSongs);
+
+router.get("/top-weekly", authenticateToken, topWeeklySongs);
+
+router.get("/video-songs", authenticateToken, getAllVideoSongs);
+
+router.get("/old-songs", authenticateToken, oldestSongs);
 
 module.exports = router;

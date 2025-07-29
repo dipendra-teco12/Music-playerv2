@@ -23,9 +23,10 @@ const musicSchema = new mongoose.Schema(
       type: String,
     },
     audioFilePublicId: String,
-    VideoFile: {
+    videoFile: {
       type: String,
     },
+    videoFilePublicId: String,
     releaseDate: {
       type: Date,
     },
@@ -33,8 +34,15 @@ const musicSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    viewsCount: {
+      type: Number,
+      default: 0,
+    },
     description: {
       type: String,
+    },
+    singleTrack: {
+      type: Boolean,
     },
   },
   {

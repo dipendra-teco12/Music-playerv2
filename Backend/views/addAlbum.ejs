@@ -249,8 +249,12 @@
 
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  
   <script>
-    
+      window.__INITIAL_DATA__ = {
+    mode: "<%= mode %>",
+    song: <%- JSON.stringify(song || {}) %>
+  };
      // Replace the document ready function in your addAlbum page with this:
 
 $(document).ready(function () {
@@ -258,39 +262,20 @@ $(document).ready(function () {
 
   // Check if we're in edit mode from URL parameters
   const urlParams = new URLSearchParams(window.location.search);
-  const mode = urlParams.get('mode');
+
   const songId = urlParams.get('id');
   
-  if (mode === 'edit' && songId) {
-    // Try to get song data from sessionStorage first
-    const editSongData = sessionStorage.getItem('editSongData');
-    
-    if (editSongData) {
-      const song = JSON.parse(editSongData);
-      populateFormForEdit(song);
-      // Clear the stored data
-      sessionStorage.removeItem('editSongData');
-    } else {
-      // Fallback: fetch song data directly
-      axios.get(`/api/song/${songId}`)
-        .then((res) => {
-          populateFormForEdit(res.data);
-        })
-        .catch((err) => {
-          console.error('Error fetching song data:', err);
-          alert('Error loading song data for editing');
-        });
-    }
+ const mode = window.__INITIAL_DATA__.mode || 'create';
+  const song = window.__INITIAL_DATA__.song || null;
+
+  if (mode === 'edit' && song) {
+    populateFormForEdit(song);
   }
 
   function populateFormForEdit(song) {
-    // Set form to edit mode
     $("#uploadForm").attr("data-mode", "edit").attr("data-id", song._id || song.id);
-    console.log("Setting data-id:", song._id || song.id);
-    // Update button text
     $("#submitBtn").text("Update");
-    
-    // Populate form fields
+
     $("#albumName").val(song.albumName || song.albumNames || '');
     $("#artistName").val(song.artistName || song.artistNames || '');
     $("#title").val(song.title || '');
@@ -298,19 +283,16 @@ $(document).ready(function () {
     $("#genreSelect").val(song.genre || '');
     $("#playlistSelect").val(song.playlist || song.playlistNames || '');
     $("#description").val(song.description || '');
-    
-    // Handle release date
+
     if (song.releaseDate) {
       const releaseDate = song.releaseDate.split("T")[0];
       $("#releaseDate").val(releaseDate);
     }
-    
-    // Make audio file optional in edit mode
+
     $("#audioFile").removeAttr("required");
-    
-    // Update page title or add some indication we're editing
     $("h1.m-0").text("Edit Album Details");
   }
+
 
   function validateForm() {
     let valid = true;

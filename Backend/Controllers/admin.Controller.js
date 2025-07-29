@@ -30,20 +30,23 @@ const uploadSong = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    const songImage = req.files?.songImage?.[0]?.path ;
+    const songImage = req.files?.songImage?.[0]?.path;
     const songImagePublicId = req.files?.songImage?.[0]?.filename;
 
-    const artistImage =
-      req.files?.artistImage?.[0]?.path ;
+    const artistImage = req.files?.artistImage?.[0]?.path;
 
     const audioFile = req.files?.audioFile?.[0]?.path;
     const audioFilePublicId = req.files?.audioFile?.[0]?.filename;
 
-    if (!audioFile) {
-      return res.status(400).json({ message: "Missing audio file" });
+    const videoFile = req.files?.videoFile?.[0]?.path;
+    const videoFilePublicId = req.files?.videoFile?.[0]?.filename;
+
+    if (!audioFile && !videoFile) {
+      return res
+        .status(400)
+        .json({ message: "Missing audio file or video file" });
     }
 
-  
     const songdata = await Music.create({
       title,
       length,
@@ -54,8 +57,10 @@ const uploadSong = async (req, res) => {
       songImagePublicId,
       audioFile,
       audioFilePublicId,
+      videoFile,
+      videoFilePublicId,
+      singleTrack: true,
     });
-
 
     if (artistName) {
       const normalizedName = artistName.trim().toLowerCase();
@@ -107,11 +112,10 @@ const addAlbum = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    const songImage = req.files?.songImage?.[0]?.path ;
+    const songImage = req.files?.songImage?.[0]?.path;
     const songImagePublicId = req.files?.songImage?.[0]?.filename;
-    const artistImage =
-      req.files?.artistImage?.[0]?.path ;
-    const albumImage = req.files?.albumImage?.[0]?.path ;
+    const artistImage = req.files?.artistImage?.[0]?.path;
+    const albumImage = req.files?.albumImage?.[0]?.path;
     const audioFile = req.files?.audioFile?.[0]?.path;
     const audioFilePublicId = req.files?.audioFile?.[0]?.filename;
 
@@ -197,7 +201,6 @@ const updateSong = async (req, res) => {
       description,
     } = req.body;
 
-    
     if (!title || !genre || !releaseDate) {
       return res.status(400).json({ message: "Missing required fields" });
     }
@@ -207,14 +210,12 @@ const updateSong = async (req, res) => {
       return res.status(404).json({ message: "Song not found" });
     }
 
-  
     song.title = title;
     song.length = length;
     song.genre = genre;
     song.releaseDate = releaseDate;
     song.description = description;
 
-    
     if (req.files?.songImage) {
       song.songImage = req.files.songImage[0].path;
       song.songImagePublicId = req.files.songImage[0].filename;
@@ -226,13 +227,11 @@ const updateSong = async (req, res) => {
 
     await song.save();
 
-  
     const normAlbum = albumName?.trim().toLowerCase();
     const currentAlbum = await Album.findOne({ albumSong: song._id });
     let targetAlbum = currentAlbum;
 
     if (normAlbum) {
-      
       if (currentAlbum && currentAlbum.albumName.toLowerCase() !== normAlbum) {
         currentAlbum.albumSong.pull(song._id);
         await currentAlbum.save();
@@ -251,8 +250,7 @@ const updateSong = async (req, res) => {
           await targetAlbum.save();
         }
       } else {
-        const albumImage =
-          req.files?.albumImage?.[0]?.path ;
+        const albumImage = req.files?.albumImage?.[0]?.path;
         targetAlbum = await Album.create({
           albumName: albumName.trim(),
           albumImage,
@@ -261,7 +259,6 @@ const updateSong = async (req, res) => {
       }
     }
 
-    
     const normArtist = artistName?.trim().toLowerCase();
     const currentArtist = await Artist.findOne({ artistSong: song._id });
     let targetArtist = currentArtist;
@@ -290,8 +287,7 @@ const updateSong = async (req, res) => {
           targetArtist.artistAlbum.push(targetAlbum._id);
         await targetArtist.save();
       } else {
-        const artistImage =
-          req.files?.artistImage?.[0]?.path ;
+        const artistImage = req.files?.artistImage?.[0]?.path;
         await Artist.create({
           artistName: artistName.trim(),
           artistImage,
@@ -336,9 +332,7 @@ const getAllSongs = async (req, res) => {
   try {
     const { title } = req.query;
 
-    const filter = title
-      ? { title: { $regex: title, $options: "i" } } // case-insensitive search
-      : {};
+    const filter = title ? { title: { $regex: title, $options: "i" } } : {};
 
     const musics = await Music.find(filter).lean();
     const artists = await Artist.find().lean();
@@ -524,6 +518,14 @@ const deleteSong = async (req, res) => {
     if (song.audioFilePublicId) {
       deletions.push(
         cloudinary.uploader.destroy(song.audioFilePublicId, {
+          resource_type: "video",
+        })
+      );
+    }
+
+    if (song.videoFilePublicId) {
+      deletions.push(
+        cloudinary.uploader.destroy(song.videoFilePublicId, {
           resource_type: "video",
         })
       );

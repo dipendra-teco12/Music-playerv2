@@ -17,6 +17,8 @@ const storage = new CloudinaryStorage({
       folder = "MusicApp/Images";
     } else if (field === "audioFile") {
       folder = "MusicApp/Audio";
+    } else if (field === "videoFile") {
+      folder = "MusicApp/Video";
     }
 
     return {
@@ -31,11 +33,16 @@ const storage = new CloudinaryStorage({
         "aac",
         "ogg",
         "webp",
+        "mp4",
+        "mov",
+        "avi",
+        "mkv",
       ],
 
       public_id: `${Date.now()}-${file.originalname.replace(/\s/g, "_")}`,
 
-      resource_type: field === "audioFile" ? "video" : "auto",
+      resource_type:
+        field === "audioFile" || field === "videoFile" ? "video" : "auto",
     };
   },
 });
@@ -50,13 +57,14 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     if (
       file.mimetype.startsWith("image/") ||
-      file.mimetype.startsWith("audio/")
+      file.mimetype.startsWith("audio/") ||
+      file.mimetype.startsWith("video/")
     ) {
       cb(null, true);
     } else {
       cb(
         new Error(
-          "Invalid file type. Only images and audio files are allowed."
+          "Invalid file type. Only images, audio and video files are allowed."
         ),
         false
       );

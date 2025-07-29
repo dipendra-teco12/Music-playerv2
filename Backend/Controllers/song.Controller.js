@@ -88,6 +88,7 @@ const getSong = async (req, res) => {
       description: song.description,
       playlistNames,
       albumNames,
+      singleTrack: song.singleTrack,
     });
   } catch (err) {
     console.error(err);
@@ -161,6 +162,78 @@ const genre = async (req, res) => {
     res.status(500).json({ message: "Intenal Server Error" });
   }
 };
+
+const mostViewedSongs = async (req, res) => {
+  try {
+    const songs = await Music.find()
+      .select("title audioFile genre songImage length viewsCount likesCount")
+      .sort({ viewsCount: -1 }); // Sort in descending order of views
+    res
+      .status(200)
+      .json({ message: "most-viewed songs successfully fetched", songs });
+  } catch (error) {
+    console.error("Error fetching most viewed songs:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const topWeeklySongs = async (req, res) => {
+  try {
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+    const songs = await Music.find({ createdAt: { $gte: oneWeekAgo } })
+      .select(
+        "title audioFile genre songImage length viewsCount likesCount releaseDate"
+      )
+      .sort({
+        likesCount: -1,
+      });
+
+    res.status(200).json({
+      message: "Top weekly songs successfully fetched",
+      songs,
+    });
+  } catch (error) {
+    console.error("Error fetching top weekly songs:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const getAllVideoSongs = async (req, res) => {
+  try {
+    const videoSongs = await Music.find({
+      videoFile: { $exists: true, $ne: null, $ne: "" },
+    })
+      .select("title videoFile length releaseData genre likesCount viewsCount")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      message: "Video songs fetched successfully",
+      songs: videoSongs,
+    });
+  } catch (error) {
+    console.error("Error fetching video songs:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const oldestSongs = async (req, res) => {
+  try {
+    const songs = await Music.find()
+      .select(
+        "title audioFile genre songImage length viewsCount likesCount releaseDate"
+      )
+      .sort({ releaseDate: 1 });
+    res
+      .status(200)
+      .json({ message: "oldest songs successfully fetched", songs });
+  } catch (error) {
+    console.error("Error fetching oldest songs:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 module.exports = {
   addFavoriteSong,
   removeFavoriteSong,
@@ -169,4 +242,8 @@ module.exports = {
   likeSong,
   disLikeSong,
   genre,
+  mostViewedSongs,
+  topWeeklySongs,
+  getAllVideoSongs,
+  oldestSongs,
 };

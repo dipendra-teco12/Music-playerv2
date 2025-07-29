@@ -31,6 +31,7 @@ router.post(
     { name: "songImage", maxCount: 1 },
     { name: "artistImage", maxCount: 1 },
     { name: "audioFile", maxCount: 1 },
+    { name: "videoFile", maxCount: 1 },
   ]),
   uploadSong
 );
@@ -70,27 +71,53 @@ router.get("/forgot-password", (req, res) => {
   res.render("authviews/forgot-password", { layout: false });
 });
 
-router.get("/uploadsong", authenticateToken, isAdmin, (req, res) => {
-  res.render("uploadsong", { activePage: "uploadsong" });
+router.get("/uploadsong", authenticateToken, isAdmin, async(req, res) => {
+ try {
+    const { mode, id } = req.query;
+    if (!id) {
+      return res.render("uploadSong", {
+        song: null,
+        mode: "create",
+        activePage: "uploadSong",
+      });
+    }
+    let song = null;
+
+    if (mode === "edit" && id) {
+      song = await getSongData(id);
+    }
+
+    res.render("uploadSong", {
+      song: song,
+      mode: mode || "create",
+      activePage: "uploadSong",
+    });
+  } catch (error) {
+    console.error("Error loading uploadSong page:", error);
+    res.status(500).send("Error loading page");
+  }
 });
 
 router.get("/addAlbum", authenticateToken, isAdmin, async (req, res) => {
   try {
     const { mode, id } = req.query;
     if (!id) {
-      return res.render("addAlbum", { song: null, activePage: "addAlbum" });
+      return res.render("addAlbum", {
+        song: null,
+        mode: "create",
+        activePage: "addAlbum",
+      });
     }
     let song = null;
 
     if (mode === "edit" && id) {
       song = await getSongData(id);
-    
     }
 
     res.render("addAlbum", {
       song: song,
       mode: mode || "create",
-      activePage: "myAlbums",
+      activePage: "addAlbum",
     });
   } catch (error) {
     console.error("Error loading addAlbum page:", error);
@@ -179,6 +206,5 @@ router.delete("/super-admin/:id", async (req, res) => {
   await User.findByIdAndDelete(req.params.id);
   res.redirect("/admin/super-admin");
 });
-
 
 module.exports = router;

@@ -178,24 +178,24 @@
           : "N/A";
 
         const row = `
-      <tr>
-        <td>${song.title}</td>
-        <td>${releaseDate}</td>
-        <td><span class="tag tag-success">${song.likesCount ?? 0}</span></td>
-        <td>${song.singer ?? "Unknown"}</td>
-        <td>${formatLength(song.length)}</td>
-        <td>
-          <button type="button" class="btn btn-primary" data-id="${song._id}">
-            <i class="fas fa-edit"></i>
-          </button>
-          <button type="button" class="btn btn-danger delete-btn" data-id="${
-            song._id
-          }">
-            <i class="fas fa-trash" aria-hidden="true"></i>
-          </button>
-        </td>
-      </tr>
-    `;
+       <tr>
+         <td>${song.title}</td>
+         <td>${releaseDate}</td>
+         <td><span class="tag tag-success">${song.likesCount ?? 0}</span></td>
+         <td>${song.singer ?? "Unknown"}</td>
+         <td>${formatLength(song.length)}</td>
+         <td>
+           <button type="button" class="btn btn-primary" data-id="${song._id}">
+             <i class="fas fa-edit"></i>
+           </button>
+           <button type="button" class="btn btn-danger delete-btn" data-id="${
+             song._id
+           }">
+             <i class="fas fa-trash" aria-hidden="true"></i>
+           </button>
+         </td>
+       </tr>
+     `;
         $tbody.append(row);
         matchedCount++;
       }
@@ -260,8 +260,21 @@
     setInterval(fetchCounts, 30000);
   });
 
-  $(document).on("click", ".btn-primary[data-id]", function () {
+  $(document).on("click", ".btn-primary[data-id]", async function () {
     const songId = $(this).data("id");
-    window.location.href = `/admin/addAlbum?mode=edit&id=${songId}`;
+
+    try {
+      
+      const response = await axios.get(`/api/song/track/${songId}`);
+      const song = response.data;
+
+      if (song.singleTrack === true) {
+        window.location.href = `/admin/uploadSong?mode=edit&id=${songId}`;
+      } else {
+        window.location.href = `/admin/addAlbum?mode=edit&id=${songId}`;
+      }
+    } catch (error) {
+      console.error("Error fetching song data for editing:", error);
+    }
   });
 </script>
