@@ -3,12 +3,86 @@
   <head>
     <link rel="stylesheet" href="/adminlte/css/adminlte.min.css" />
     <link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css" />
-    <!-- <link rel="stylesheet" href="/plugins/bootstrap/css/bootstrap.min.css" /> -->
     <link
       rel="stylesheet"
       href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css"
     />
+    <!-- DataTables CSS - Bootstrap 4 theme for AdminLTE compatibility -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css"
+    />
     <title>Admin Panel</title>
+    <style>
+      /* Custom CSS to align DataTables controls on the same line */
+      .dataTables_wrapper .dataTables_length {
+        float: left;
+        margin-bottom: 10px;
+      }
+
+      .dataTables_wrapper .dataTables_filter {
+        float: right;
+        margin-bottom: 10px;
+      }
+
+      .dataTables_wrapper .dataTables_info {
+        float: left;
+        margin-top: 10px;
+        padding-top: 8px;
+      }
+
+      .dataTables_wrapper .dataTables_paginate {
+        float: right;
+        margin-top: 10px;
+      }
+
+      /* Clear floats after top controls */
+      .dataTables_wrapper .dataTables_length::after,
+      .dataTables_wrapper .dataTables_filter::after {
+        content: "";
+        display: table;
+        clear: both;
+      }
+
+      /* Ensure the table clears the floated elements */
+      .dataTables_wrapper .dataTable {
+        clear: both;
+        margin-top: 6px !important;
+      }
+
+      /* Style the filter input */
+      .dataTables_filter input {
+        margin-left: 5px;
+        padding: 4px 8px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+      }
+
+      /* Style the length select */
+      .dataTables_length select {
+        padding: 4px 18px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        margin: 0 5px;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter {
+          float: none;
+          text-align: left;
+          margin-bottom: 10px;
+        }
+
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_paginate {
+          float: none;
+          text-align: center;
+          margin-top: 10px;
+        }
+      }
+    </style>
   </head>
   <body class="hold-transition sidebar-mini">
     <div class="wrapper">
@@ -23,8 +97,12 @@
       <%- include('partials/footer') %>
     </div>
 
+    <!-- JavaScript files in correct order -->
     <script src="/plugins/jquery/jquery.min.js"></script>
     <script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="/adminlte/js/adminlte.min.js"></script>
+    <!-- DataTables JavaScript -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
   </body>
 </html>
