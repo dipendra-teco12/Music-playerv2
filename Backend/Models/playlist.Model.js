@@ -4,6 +4,10 @@ const playlistSchema = new mongoose.Schema(
   {
     playlistName: String,
     coverImage: String,
+    userPlayList: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
     playlistSong: [{ type: mongoose.Schema.Types.ObjectId, ref: "Music" }],
   },
   { timestamps: true }

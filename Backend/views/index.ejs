@@ -238,7 +238,7 @@
       songsData = response.data || [];
 
       rebuildTable(songsData);
-      console.log("Songs table initialized successfully");
+      // console.log("Songs table initialized successfully");
     } catch (error) {
       console.error("❌ Failed to fetch songs:", error);
       $("#music-table-body").html(
@@ -281,7 +281,7 @@
         fetchCounts();
       }
 
-      console.log("Song deleted successfully");
+      // console.log("Song deleted successfully");
     } catch (error) {
       console.error("Delete failed:", error);
       alert("Failed to delete song. Please try again.");

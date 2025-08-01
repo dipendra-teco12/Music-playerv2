@@ -20,6 +20,19 @@
       color: red;
       font-size: 0.9em;
       margin-top: 2px;
+      min-height: 1.2em; /* Reserve space for error messages */
+      line-height: 1.2;
+      display: block;
+    }
+    
+    /* Ensure consistent spacing for form groups */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    /* Prevent layout shift when errors appear */
+    .form-group .error-message:empty {
+      display: block;
     }
   </style>
 
@@ -146,7 +159,7 @@
       <div class="row">
         <div class="col-sm-6">
           <div class="form-group">
-            <label for="Length">Audio Length (seconds)</label>           
+            <label for="Length">Audio/Video Length (seconds)</label>           
             <input
               type="number"
               class="form-control"

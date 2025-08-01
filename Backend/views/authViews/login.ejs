@@ -13,17 +13,40 @@
     />
 
     <style>
+      .login-box {
+        width: 360px;
+        margin: auto;
+      }
+
+      .login-card-body {
+        min-height: 320px; /* Fixed minimum height */
+      }
+
       .error-message {
         color: #dc3545;
         font-size: 0.875em;
         margin-top: 0.25rem;
         display: block;
+        min-height: 1.2em; /* Reserve space for error messages */
+        line-height: 1.2;
       }
+
       .is-invalid {
         border-color: #dc3545;
       }
+
       .input-group .is-invalid ~ .input-group-append .input-group-text {
         border-color: #dc3545;
+      }
+
+      /* Ensure consistent spacing */
+      .input-group {
+        margin-bottom: 0.5rem !important;
+      }
+
+      /* Fixed positioning for form elements */
+      .form-section {
+        margin-bottom: 1rem;
       }
     </style>
   </head>
@@ -36,39 +59,43 @@
           <p class="login-box-msg">Sign in to start your session</p>
 
           <form id="login-form" action="javascript:void(0)" novalidate>
-            <div class="input-group mb-3">
-              <input
-                type="email"
-                class="form-control"
-                name="email"
-                id="email"
-                placeholder="Email"
-                required
-              />
-              <div class="input-group-append">
-                <div class="input-group-text">
-                  <span class="bi bi-envelope"></span>
+            <div class="form-section">
+              <div class="input-group">
+                <input
+                  type="email"
+                  class="form-control"
+                  name="email"
+                  id="email"
+                  placeholder="Email"
+                  required
+                />
+                <div class="input-group-append">
+                  <div class="input-group-text">
+                    <span class="bi bi-envelope"></span>
+                  </div>
                 </div>
               </div>
+              <div class="error-message" id="emailError"></div>
             </div>
-            <div class="error-message" id="emailError"></div>
 
-            <div class="input-group mb-3">
-              <input
-                type="password"
-                class="form-control"
-                name="password"
-                id="password"
-                placeholder="Password"
-                required
-              />
-              <div class="input-group-append">
-                <div class="input-group-text">
-                  <span class="bi bi-lock-fill"></span>
+            <div class="form-section">
+              <div class="input-group">
+                <input
+                  type="password"
+                  class="form-control"
+                  name="password"
+                  id="password"
+                  placeholder="Password"
+                  required
+                />
+                <div class="input-group-append">
+                  <div class="input-group-text">
+                    <span class="bi bi-lock-fill"></span>
+                  </div>
                 </div>
               </div>
+              <div class="error-message" id="passwordError"></div>
             </div>
-            <div class="error-message" id="passwordError"></div>
 
             <div class="row">
               <div class="col-4" style="margin: auto">
@@ -83,22 +110,22 @@
             </div>
           </form>
 
-          <div class="social-auth-links text-center mb-3 d-grid gap-2">
+          <!-- <div class="social-auth-links text-center mb-3 d-grid gap-2">
             <p>- OR -</p>
 
             <a href="/auth/google" class="btn btn-danger">
               <i class="bi bi-google me-2"></i> Sign in using Google+
             </a>
-          </div>
+          </div> -->
 
-          <p class="mb-1">
+          <p class="mb-1 mt-2">
             <a href="/admin/forgot-password">I forgot my password</a>
           </p>
-          <p class="mb-0">
+          <!-- <p class="mb-0">
             <a href="/admin/register" class="text-center"
               >Register a new membership</a
             >
-          </p>
+          </p> -->
         </div>
       </div>
     </div>
@@ -201,7 +228,7 @@
               password,
             });
 
-            alert("Login successful!");
+            // alert("Login successful!");
             window.location.href = "/admin/dashboard";
           } catch (err) {
             const msg = err.response?.data?.message || "Login failed.";

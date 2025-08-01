@@ -4,7 +4,7 @@ const app = express();
 const expressLayouts = require("express-ejs-layouts");
 const passport = require("passport");
 const connectDB = require("./config/db");
-const methodOverride = require("method-override");
+const methodOverride = require("method-override"); // this line of code is is used by super-admin form page
 app.use(methodOverride("_method"));
 require("dotenv").config({ quiet: true });
 require("./config/oauth");
@@ -51,11 +51,14 @@ app.get("/", (req, res) => {
   res.render("authViews/login", { layout: false });
 });
 const songRoutes = require("./Routes/songRoutes");
+const userRoutes = require("./Routes/userRoutes");
+
 app.use("/auth/google", oauthRoute);
 app.use("/admin", adminRoutes);
 
 app.use("/api/auth", authRoute);
 app.use("/api/song", songRoutes);
+app.use("/api/user", userRoutes);
 
 connectDB();
 

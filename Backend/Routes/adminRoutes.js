@@ -18,6 +18,8 @@ const {
   getSongData,
   getAllUsers,
   updateSong,
+  privacyPolicy,
+  getPolicy,
 } = require("../Controllers/admin.Controller");
 
 const authenticateToken = require("../Middlewares/authMiddleware");
@@ -71,8 +73,8 @@ router.get("/forgot-password", (req, res) => {
   res.render("authviews/forgot-password", { layout: false });
 });
 
-router.get("/uploadsong", authenticateToken, isAdmin, async(req, res) => {
- try {
+router.get("/uploadsong", authenticateToken, isAdmin, async (req, res) => {
+  try {
     const { mode, id } = req.query;
     if (!id) {
       return res.render("uploadSong", {
@@ -155,6 +157,13 @@ router.get("/myAlbums/songs", authenticateToken, isAdmin, (req, res) => {
   });
 });
 
+router.get("/text-editor", authenticateToken, isAdmin, (req, res) => {
+  res.render("text-editor", {
+    title: "text-editor",
+    activePage: "text-editor",
+  });
+});
+
 router.get("/myPlaylists/songs", authenticateToken, isAdmin, (req, res) => {
   res.render("myPlaylistSongs", {
     title: "My Playlist Songs",
@@ -187,7 +196,11 @@ router.delete(
   deletePlaylist
 );
 
-const isSuperAdmin = require("../Middlewares/isSuperAdmin");
+router.post("/save-privacy", authenticateToken, privacyPolicy);
+
+router.get("/privacy-policy", authenticateToken, getPolicy);
+
+// const isSuperAdmin = require("../Middlewares/isSuperAdmin");
 
 router.get("/super-admin", getAllUsers, (req, res) => {
   let users = req.primeusers;

@@ -668,6 +668,41 @@ const getAllUsers = async (req, res, next) => {
   }
 };
 
+const PrivacyPolicy = require("../Models/privacyPolicy");
+
+const privacyPolicy = async (req, res) => {
+  try {
+    const { html } = req.body;
+
+    // Optional: Only one policy in DB? Then update existing
+    let policy = await PrivacyPolicy.findOne();
+    if (policy) {
+      policy.html = html;
+      await policy.save();
+    } else {
+      policy = await PrivacyPolicy.create({ html });
+    }
+
+    res.status(200).json({ message: "Privacy policy saved." });
+  } catch (err) {
+    console.error("Error saving privacy policy:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+const getPolicy = async (req, res) => {
+  try {
+    let policy = await PrivacyPolicy.findOne();
+
+    res
+      .status(200)
+      .json({ message: "Privacy policy fetched Successfully.", policy });
+  } catch (err) {
+    console.error("Error fetching privacy policy:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   uploadSong,
   addAlbum,
@@ -686,5 +721,7 @@ module.exports = {
   deletePlaylist,
   getSongData,
 
+  privacyPolicy,
+  getPolicy,
   getAllUsers,
 };

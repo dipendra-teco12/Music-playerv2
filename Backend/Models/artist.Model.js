@@ -9,7 +9,7 @@ const artistSchema = new mongoose.Schema(
     artistImage: {
       type: String,
       default:
-        "https://res.cloudinary.com/dfciwmday/image/upload/v1753418817/MusicApp/defaults/artist1_lykttl.jpg",
+        "https://res.cloudinary.com/dfciwmday/image/upload/v1753964374/MusicApp/Defaults/artistimages_akpaxo.webp",
     },
     artistSong: [
       {

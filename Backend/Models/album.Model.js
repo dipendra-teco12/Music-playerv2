@@ -6,7 +6,7 @@ const albumSchema = new mongoose.Schema(
     albumImage: {
       type: String,
       default:
-        "https://res.cloudinary.com/dfciwmday/image/upload/v1753418602/MusicApp/defaults/album3_tbqtj9.jpg",
+        "https://res.cloudinary.com/dfciwmday/image/upload/v1753964756/MusicApp/Defaults/download_x7xczm.jpg",
     },
     albumSong: [
       {
