@@ -110,8 +110,8 @@ const getSongsOfPlaylist = async (req, res) => {
 
     const playlist = await Playlist.findOne({ _id: playlistId }).populate(
       "playlistSong",
-      "-singleTrack -description -createdAt -updatedAt"
-    ); // select only needed fields
+      "-singleTrack -lyrics -createdAt -updatedAt"
+    );
 
     if (playlist.playlistSong.length === 0) {
       return res.status(200).json({ message: "No Song in the playlist" });
@@ -130,9 +130,30 @@ const getSongsOfPlaylist = async (req, res) => {
   }
 };
 
+const deletePlaylist = async (req, res) => {
+  try {
+    const { playlistId } = req.params;
+    if (!playlistId) {
+      return res.status(400).json({ message: "Playlist Id is required" });
+    }
+
+    const deletedPlaylist = await Playlist.findByIdAndDelete({
+      _id: playlistId,
+    });
+
+    res
+      .status(200)
+      .json({ message: "playlist Successfully Deleted", deletedPlaylist });
+  } catch (error) {
+    console.log("Error while deleting playlist", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   userPlaylist,
   addSongInPlaylist,
   getSongsOfPlaylist,
   removeSongFromPlaylist,
+  deletePlaylist,
 };

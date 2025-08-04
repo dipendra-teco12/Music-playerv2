@@ -85,7 +85,7 @@ const getSong = async (req, res) => {
       genre: song.genre,
       length: song.length,
       releaseDate: song.releaseDate,
-      description: song.description,
+      lyrics: song.lyrics,
       playlistNames,
       albumNames,
       singleTrack: song.singleTrack,

@@ -233,18 +233,18 @@
         </div>
       </div>
 
-      <!-- Description -->
+      <!-- lyrics -->
       <div class="row">
         <div class="col-sm-6">
           <div class="form-group">
-            <label>Description</label>
+            <label>Lyrics</label>
             <textarea
               class="form-control"
               rows="3"
-              name="description"
-              id="description"
-            ><%= song ? song.description : '' %></textarea>
-            <div class="error-message" id="descriptionError"></div>
+              name="lyrics"
+              id="lyrics"
+            ><%= song ? song.lyrics : '' %></textarea>
+            <div class="error-message" id="lyricsError"></div>
           </div>
         </div>
       </div>
@@ -289,7 +289,7 @@
       $("#Length").val(song.length || '');
       $("#genreSelect").val(song.genre || '');
       $("#playlistSelect").val(song.playlist || song.playlistNames || '');
-      $("#description").val(song.description || '');
+      $("#lyrics").val(song.lyrics || '');
 
       if (song.releaseDate) {
         const releaseDate = song.releaseDate.split("T")[0];
@@ -313,7 +313,7 @@
       setError("Length", "");
       setError("songImage", "");
       setError("artistImage", "");
-      setError("description", "");
+      setError("lyrics", "");
       setError("videoFile", "");
 
       // Song Title validation
@@ -494,12 +494,12 @@
         }
       });
 
-      // Description validation
-      const description = $("#description").val();
-      if (description && description.length > 500) {
+      // lyrics validation
+      const lyrics = $("#lyrics").val();
+      if (lyrics && lyrics.length > 500) {
         setError(
-          "description",
-          "Description must not exceed 500 characters."
+          "lyrics",
+          "lyrics must not exceed 500 characters."
         );
         valid = false;
       }

@@ -240,16 +240,16 @@
           <div class="col-sm-6">
             <!-- textarea -->
             <div class="form-group">
-              <label>Description</label>
+              <label>Lyrics</label>
               <textarea
                 class="form-control"
                 rows="3"
                 placeholder="Enter ..."
-                name="description"
-                id="description"
+                name="lyrics"
+                id="lyrics"
               
-              ><%= song ? song.description : '' %></textarea>
-              <div class="error-message" id="descriptionError"></div>
+              ><%= song ? song.lyrics : '' %></textarea>
+              <div class="error-message" id="lyricsError"></div>
               
             </div>
           </div>
@@ -295,7 +295,7 @@ $(document).ready(function () {
     $("#Length").val(song.length || '');
     $("#genreSelect").val(song.genre || '');
     $("#playlistSelect").val(song.playlist || song.playlistNames || '');
-    $("#description").val(song.description || '');
+    $("#lyrics").val(song.lyrics || '');
 
     if (song.releaseDate) {
       const releaseDate = song.releaseDate.split("T")[0];
@@ -322,7 +322,7 @@ $(document).ready(function () {
     setError("albumImage", "");
     setError("artistImage", "");
     setError("songImage", "");
-    setError("description", "");
+    setError("lyrics", "");
 
     // Album Name validation
     const albumName = $("#albumName").val().trim();
@@ -450,10 +450,10 @@ $(document).ready(function () {
       }
     });
 
-    // Description validation
-    const description = $("#description").val();
-    if (description && description.length > 500) {
-      setError("description", "Description must not exceed 500 characters.");
+    // lyrics validation
+    const lyrics = $("#lyrics").val();
+    if (lyrics && lyrics.length > 500) {
+      setError("lyrics", "lyrics must not exceed 500 characters.");
       valid = false;
     }
 

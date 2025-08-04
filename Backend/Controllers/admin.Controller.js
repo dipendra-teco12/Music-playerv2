@@ -23,7 +23,7 @@ const uploadSong = async (req, res) => {
       genre,
       playlist,
       releaseDate,
-      description,
+      lyrics,
     } = req.body;
 
     if (!title || !genre || !playlist || !releaseDate) {
@@ -52,7 +52,7 @@ const uploadSong = async (req, res) => {
       length,
       genre,
       releaseDate,
-      description,
+      lyrics,
       songImage,
       songImagePublicId,
       audioFile,
@@ -105,7 +105,7 @@ const addAlbum = async (req, res) => {
       genre,
       playlist,
       releaseDate,
-      description,
+      lyrics,
     } = req.body;
 
     if (!title || !genre || !playlist || !releaseDate) {
@@ -128,7 +128,7 @@ const addAlbum = async (req, res) => {
       length,
       genre,
       releaseDate,
-      description,
+      lyrics,
       songImage,
       songImagePublicId,
       audioFile,
@@ -198,7 +198,7 @@ const updateSong = async (req, res) => {
       genre,
       playlist,
       releaseDate,
-      description,
+      lyrics,
     } = req.body;
 
     if (!title || !genre || !releaseDate) {
@@ -214,7 +214,7 @@ const updateSong = async (req, res) => {
     song.length = length;
     song.genre = genre;
     song.releaseDate = releaseDate;
-    song.description = description;
+    song.lyrics = lyrics;
 
     if (req.files?.songImage) {
       song.songImage = req.files.songImage[0].path;
@@ -639,7 +639,7 @@ const getSongData = async (songId) => {
         genre: songData.genre,
         length: songData.length,
         releaseDate: songData.releaseDate.toISOString().slice(0, 10),
-        description: songData.description,
+        lyrics: songData.lyrics,
         playlistNames,
         albumNames,
         artistNames,

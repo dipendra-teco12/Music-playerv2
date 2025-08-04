@@ -38,7 +38,7 @@ const musicSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    description: {
+    lyrics: {
       type: String,
     },
     singleTrack: {

@@ -196,6 +196,22 @@ router.delete(
   deletePlaylist
 );
 
+router.get("/error-500", (req, res) =>
+  res.render("500", {
+    title: "undefined",
+    activePage: "500",
+  })
+);
+
+router.get("/error-404", (req, res) =>
+  res.render("404", {
+    title: "undefined",
+    activePage: "404",
+  })
+);
+
+router.get("/error-403", (req, res) => res.render("403", { layout: false }));
+
 router.post("/save-privacy", authenticateToken, privacyPolicy);
 
 router.get("/privacy-policy", authenticateToken, getPolicy);
