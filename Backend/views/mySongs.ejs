@@ -1,3 +1,9 @@
+<style>
+  .row-deleting {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+</style>
 <div class="content-header">
   <div class="container-fluid">
     <div class="row mb-2">
@@ -51,38 +57,14 @@
   </div>
 </section>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script src="/plugins/jquery/jquery.min.js"></script>
-
-<style>
-  .row-deleting {
-    opacity: 0.5;
-    pointer-events: none;
-  }
-</style>
 
 <script>
   let songsTable = null;
-  let songsData = []; // Keep track of current songs data
 
-  async function fetchCounts() {
-    try {
-      const response = await axios.get("/admin/dashboardcount");
-
-      $("#song-box").text(response.data.totalSongs ?? 0);
-      $("#album-box").text(response.data.totalAlbums ?? 0);
-      $("#playlist-box").text(response.data.totalPlaylists ?? 0);
-      $("#artist-box").text(response.data.totalArtists ?? 0);
-    } catch (error) {
-      console.error("Error fetching counts:", error);
-
-      $("#song-box").text(0);
-      $("#album-box").text(0);
-      $("#playlist-box").text(0);
-      $("#artist-box").text(0);
-    }
-  }
-
+  // Format song length
   function formatLength(seconds) {
     if (!seconds || isNaN(seconds)) return "N/A";
     const mins = Math.floor(seconds / 60);
@@ -90,27 +72,130 @@
     return `${mins}:${secs}`;
   }
 
-  function destroyTable() {
-    if (songsTable && $.fn.DataTable.isDataTable("#songsTable")) {
-      songsTable.destroy();
-      songsTable = null;
-    }
-  }
-
+  // Initialize DataTable with server-side processing
   function initializeDataTable() {
-    destroyTable();
+    if (songsTable) {
+      songsTable.destroy();
+    }
 
     songsTable = $("#songsTable").DataTable({
-      paging: true,
+      processing: true,
+      serverSide: true,
+
+      ajax: {
+        url: "/admin/songs",
+        type: "GET",
+        data: function (d) {
+          // Map DataTable parameters to your API parameters
+          const params = {
+            page: Math.floor(d.start / d.length) + 1,
+            limit: d.length,
+            search: d.search.value,
+            sortBy: d.columns[d.order[0].column].data || "title",
+            sortOrder: d.order[0].dir,
+          };
+
+          console.log("DataTable request params:", params);
+          return params;
+        },
+
+        // This is the crucial part - properly handle the response
+        dataSrc: function (response) {
+          console.log("DataTable response:", response);
+
+          // Check if response has the expected structure
+          if (!response.songs || !response.pagination) {
+            console.error("Invalid response structure:", response);
+            return [];
+          }
+
+          // IMPORTANT: Tell DataTable about pagination info
+          response.recordsTotal = response.pagination.totalSongs;
+          response.recordsFiltered = response.pagination.totalSongs;
+
+          return response.songs.map((song) => ({
+            ...song,
+            DT_RowId: `song-${song._id}`,
+            DT_RowData: { songId: song._id },
+          }));
+        },
+
+        error: function (xhr, error, thrown) {
+          console.error("DataTable AJAX error:", error);
+          console.error("XHR:", xhr);
+
+          // Show user-friendly error
+          $("#songsTable tbody").html(`
+          <tr>
+            <td colspan="6" class="text-center text-danger">
+              Failed to load songs. Please <a href="#" onclick="songsTable.ajax.reload()">retry</a> or refresh the page.
+            </td>
+          </tr>
+        `);
+        },
+      },
+
+      columns: [
+        {
+          data: "title",
+          name: "title",
+          render: function (data, type, row) {
+            return data || "Unknown";
+          },
+        },
+        {
+          data: "releaseDate",
+          name: "releaseDate",
+          render: function (data, type, row) {
+            return data ? data.split("T")[0] : "N/A";
+          },
+        },
+        {
+          data: "likesCount",
+          name: "likesCount",
+          render: function (data, type, row) {
+            return `<span class="tag tag-success">${data ?? 0}</span>`;
+          },
+        },
+        {
+          data: "singer",
+          name: "singer",
+          render: function (data, type, row) {
+            return data ?? "Unknown";
+          },
+        },
+        {
+          data: "length",
+          name: "length",
+          render: function (data, type, row) {
+            return formatLength(data);
+          },
+        },
+        {
+          data: null,
+          orderable: false,
+          searchable: false,
+          render: function (data, type, row) {
+            return `
+            <button type="button" class="btn btn-primary btn-sm edit-btn" data-id="${row._id}">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="${row._id}">
+              <i class="fas fa-trash"></i>
+            </button>
+          `;
+          },
+        },
+      ],
+
       pageLength: 10,
-      lengthChange: true,
       lengthMenu: [5, 10, 25, 50, 100],
       searching: true,
       ordering: true,
       info: true,
       autoWidth: false,
       responsive: true,
-      dom: "lfrtip",
+
       language: {
         search: "Search songs:",
         lengthMenu: "Show _MENU_ songs per page",
@@ -119,173 +204,149 @@
         infoFiltered: "(filtered from _MAX_ total songs)",
         emptyTable: "No songs found",
         zeroRecords: "No matching songs found",
+        processing: "Loading songs...",
+        loadingRecords: "Loading...",
+        paginate: {
+          first: "First",
+          last: "Last",
+          next: "Next",
+          previous: "Previous",
+        },
       },
-      columnDefs: [
-        { targets: [0, 1, 2, 3, 4], orderable: true },
-        { targets: [5], orderable: false },
-      ],
+
+      order: [[0, "asc"]],
+
+      rowCallback: function (row, data, index) {
+        $(row).attr("data-song-id", data._id);
+      },
+
+      drawCallback: function (settings) {
+        const api = this.api();
+        const pageInfo = api.page.info();
+
+        console.log("Table drawn:", {
+          page: pageInfo.page + 1,
+          pages: pageInfo.pages,
+          recordsTotal: pageInfo.recordsTotal,
+          recordsDisplay: pageInfo.recordsDisplay,
+        });
+
+        // Hide pagination if no data
+        if (pageInfo.recordsTotal === 0) {
+          $(".dataTables_paginate").hide();
+        } else {
+          $(".dataTables_paginate").show();
+        }
+      },
+
+      // Add these options to handle empty states better
+      deferRender: true,
+      stateSave: false, // Disable state saving to avoid pagination issues
+
+      // Custom initialization
+      initComplete: function (settings, json) {
+        console.log("DataTable initialized with data:", json);
+      },
     });
   }
 
-  function rebuildTable(musicData) {
-    const $tbody = $("#music-table-body");
-
-    destroyTable();
-    $tbody.empty();
-
-    if (!musicData.length) {
-      // Don't initialize DataTable for empty tables - just show message
-      $tbody.html(
-        '<tr><td colspan="6" class="text-center">No songs found.</td></tr>'
-      );
-      return;
-    }
-
-    musicData.forEach((song) => {
-      const releaseDate = song.releaseDate
-        ? song.releaseDate.split("T")[0]
-        : "N/A";
-      const row = `
-        <tr data-song-id="${song._id}">
-          <td>${song.title || "Unknown"}</td>
-          <td>${releaseDate}</td>
-          <td><span class="tag tag-success">${song.likesCount ?? 0}</span></td>
-          <td>${song.singer ?? "Unknown"}</td>
-          <td>${formatLength(song.length)}</td>
-          <td>
-            <button type="button" class="btn btn-primary btn-sm edit-btn" data-id="${
-              song._id
-            }">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="${
-              song._id
-            }">
-              <i class="fas fa-trash" aria-hidden="true"></i>
-            </button>
-          </td>
-        </tr>
-      `;
-      $tbody.append(row);
-    });
-
-    // Only initialize DataTable if there are songs
-    setTimeout(() => {
-      initializeDataTable();
-    }, 100);
-  }
-
-  async function fetchAllMusics() {
-    try {
-      $("#music-table-body").html(
-        "<tr><td colspan='6' class='text-center'>Loading songs...</td></tr>"
-      );
-
-      const response = await axios.get("/admin/songs");
-      songsData = response.data || [];
-
-      rebuildTable(songsData);
-      console.log("Songs table initialized successfully");
-    } catch (error) {
-      console.error("❌ Failed to fetch songs:", error);
-      $("#music-table-body").html(
-        '<tr><td colspan="6" class="text-center text-danger">Failed to load songs. Please try again.</td></tr>'
-      );
-    }
-  }
-
-  // Delete handler - completely rebuild table after deletion
-  // Delete handler - completely rebuild table after deletion
+  // Delete song handler
   $(document).on("click", ".delete-btn", async function () {
-    showModal({
-      title: "Delete Song",
-      message: "Are you sure you want to delete song?",
-      confirmText: "Delete",
-      onConfirm: async () => {
-        const id = $(this).data("id");
-        const $button = $(this);
-        const $row = $button.closest("tr");
+    const songId = $(this).data("id");
 
-        if (!id) {
-          alert("Invalid song ID");
-          return;
-        }
+    // Use your existing modal function if available, otherwise use confirm
+    const confirmed =
+      typeof showModal === "function"
+        ? await new Promise((resolve) => {
+            showModal({
+              title: "Delete Song",
+              message: "Are you sure you want to delete this song?",
+              confirmText: "Delete",
+              onConfirm: () => resolve(true),
+              onCancel: () => resolve(false),
+            });
+          })
+        : confirm("Are you sure you want to delete this song?");
 
-        try {
-          // Visual feedback
-          $button
-            .prop("disabled", true)
-            .html('<i class="fas fa-spinner fa-spin"></i>');
-          $row.addClass("row-deleting");
+    if (!confirmed) return;
 
-          // Make delete request
-          await axios.delete(`/admin/song/${id}`);
+    const $button = $(this);
+    const $row = $button.closest("tr");
 
-          // Remove from local data array
-          songsData = songsData.filter((song) => song._id !== id);
+    try {
+      // Show loading state
+      $button
+        .prop("disabled", true)
+        .html('<i class="fas fa-spinner fa-spin"></i>');
+      $row.addClass("row-deleting");
 
-          // Rebuild entire table with updated data
-          rebuildTable(songsData);
+      // Delete song
+      await axios.delete(`/admin/song/${songId}`);
 
-          // Update counts after successful deletion
-          if (typeof fetchCounts === "function") {
-            fetchCounts();
-          }
+      // Refresh the table
+      songsTable.ajax.reload(null, false); // Stay on current page
 
-          // console.log("Song deleted successfully");
-        } catch (error) {
-          console.error("Delete failed:", error);
-          alert("Failed to delete song. Please try again.");
+      // Update counts if function exists
+      if (typeof fetchCounts === "function") {
+        fetchCounts();
+      }
 
-          // Restore button state on error
-          $button.prop("disabled", false).html('<i class="fas fa-trash"></i>');
-          $row.removeClass("row-deleting");
-        }
-      },
-    });
+      console.log("Song deleted successfully");
+    } catch (error) {
+      console.error("Delete failed:", error);
+      alert("Failed to delete song. Please try again.");
+
+      // Restore button state
+      $button.prop("disabled", false).html('<i class="fas fa-trash"></i>');
+      $row.removeClass("row-deleting");
+    }
   });
 
+  // Edit song handler
   $(document).on("click", ".edit-btn", async function () {
-    showModal({
-      title: "Edit Song",
-      message: "Are you sure you want to edit song?",
-      confirmText: "Edit",
-      onConfirm: async () => {
-        const songId = $(this).data("id");
-        if (!songId) {
-          alert("Invalid song ID");
-          return;
-        }
+    const songId = $(this).data("id");
 
-        try {
-          // Show loading state on button
-          const $button = $(this);
-          const originalHtml = $button.html();
-          $button
-            .prop("disabled", true)
-            .html('<i class="fas fa-spinner fa-spin"></i>');
+    // Use your existing modal function if available, otherwise use confirm
+    const confirmed =
+      typeof showModal === "function"
+        ? await new Promise((resolve) => {
+            showModal({
+              title: "Edit Song",
+              message: "Are you sure you want to edit this song?",
+              confirmText: "Edit",
+              onConfirm: () => resolve(true),
+              onCancel: () => resolve(false),
+            });
+          })
+        : confirm("Are you sure you want to edit this song?");
 
-          const response = await axios.get(`/api/song/track/${songId}`);
-          const song = response.data;
+    if (!confirmed) return;
 
-          if (song.singleTrack === true) {
-            window.location.href = `/admin/uploadSong?mode=edit&id=${songId}`;
-          } else {
-            window.location.href = `/admin/addAlbum?mode=edit&id=${songId}`;
-          }
-        } catch (error) {
-          console.error("Error fetching song data for editing:", error);
-          alert("Failed to load song data. Please try again.");
+    const $button = $(this);
+    const originalHtml = $button.html();
 
-          // Restore button state on error
-          $button.prop("disabled", false).html(originalHtml);
-        }
-      },
-    });
+    try {
+      $button
+        .prop("disabled", true)
+        .html('<i class="fas fa-spinner fa-spin"></i>');
+
+      const response = await axios.get(`/api/song/track/${songId}`);
+      const song = response.data;
+
+      if (song.singleTrack === true) {
+        window.location.href = `/admin/uploadSong?mode=edit&id=${songId}`;
+      } else {
+        window.location.href = `/admin/addAlbum?mode=edit&id=${songId}`;
+      }
+    } catch (error) {
+      console.error("Error fetching song data for editing:", error);
+      alert("Failed to load song data. Please try again.");
+      $button.prop("disabled", false).html(originalHtml);
+    }
   });
-  $(document).ready(() => {
-    fetchCounts();
-    fetchAllMusics();
-    setInterval(fetchCounts, 30000);
+
+  // Initialize everything when document is ready
+  $(document).ready(function () {
+    initializeDataTable();
   });
 </script>

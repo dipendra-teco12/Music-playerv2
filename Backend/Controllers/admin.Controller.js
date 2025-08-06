@@ -323,38 +323,124 @@ const dashboardCount = async (req, res) => {
 
 const getAllSongs = async (req, res) => {
   try {
-    const { title } = req.query;
+    const {
+      title,
+      page = 1,
+      limit = 10,
+      search = "",
+      sortBy = "title",
+      sortOrder = "asc",
+    } = req.query;
 
-    const filter = title ? { title: { $regex: title, $options: "i" } } : {};
+    // console.log("getAllSongs request params:", {
+    //   page,
+    //   limit,
+    //   search,
+    //   sortBy,
+    //   sortOrder,
+    // });
 
-    const musics = await Music.find(filter).lean();
+    // Convert to numbers and validate
+    const pageNum = Math.max(1, parseInt(page));
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit))); // Limit max page size
+    const skip = (pageNum - 1) * limitNum;
+
+    // Build filter object
+    const filter = {};
+
+    if (title) {
+      filter.title = { $regex: title, $options: "i" };
+    }
+
+    if (search) {
+      filter.$or = [{ title: { $regex: search, $options: "i" } }];
+    }
+
+    // Build sort object
+    const sortObj = {};
+    const validSortFields = ["title", "releaseDate", "likesCount", "length"];
+    const sortField = validSortFields.includes(sortBy) ? sortBy : "title";
+    sortObj[sortField] = sortOrder === "desc" ? -1 : 1;
+
+    console.log("Database query:", { filter, sortObj, skip, limit: limitNum });
+
+    // Get total count FIRST (before pagination)
+    const totalSongs = await Music.countDocuments(filter);
+    console.log("Total songs found:", totalSongs);
+
+    // Calculate if the requested page is valid
+    const totalPages = Math.max(1, Math.ceil(totalSongs / limitNum));
+    const validPage = Math.min(pageNum, totalPages);
+    const validSkip = (validPage - 1) * limitNum;
+
+    // Get paginated songs
+    const musics = await Music.find(filter)
+      .sort(sortObj)
+      .skip(validSkip)
+      .limit(limitNum)
+      .lean();
+
+    console.log("Songs retrieved:", musics.length);
+
+    // Get artists (consider optimizing this if you have many artists)
     const artists = await Artist.find().lean();
 
-    // Create a map of songId to artist name
+    // Create artist map
     const songArtistMap = new Map();
-
     artists.forEach((artist) => {
       const songs = Array.isArray(artist.artistSong)
         ? artist.artistSong
         : [artist.artistSong];
 
       songs.forEach((songId) => {
-        songArtistMap.set(String(songId), artist.artistName);
+        if (songId) {
+          // Check if songId exists
+          songArtistMap.set(String(songId), artist.artistName);
+        }
       });
     });
 
-    // Enrich songs with singer name
-    const enriched = musics.map((music) => ({
+    // Enrich songs
+    const enrichedSongs = musics.map((music) => ({
       ...music,
       singer: songArtistMap.get(String(music._id)) || "Unknown",
     }));
 
-    res.json(enriched);
+    // Pagination metadata
+    const pagination = {
+      currentPage: validPage,
+      totalPages: totalPages,
+      totalSongs: totalSongs,
+      limit: limitNum,
+      hasNextPage: validPage < totalPages,
+      hasPrevPage: validPage > 1,
+      startIndex: validSkip + 1,
+      endIndex: Math.min(validSkip + limitNum, totalSongs),
+    };
+
+    console.log("Response pagination:", pagination);
+
+    const response = {
+      songs: enrichedSongs,
+      pagination: pagination,
+    };
+
+    res.json(response);
   } catch (err) {
     console.error("Error fetching songs:", err);
-    res
-      .status(500)
-      .json({ message: "Error fetching music", error: err.message });
+    res.status(500).json({
+      message: "Error fetching music",
+      error: err.message,
+      songs: [],
+      pagination: {
+        currentPage: 1,
+        totalPages: 0,
+        totalSongs: 0,
+        limit: 10,
+        hasNextPage: false,
+        hasPrevPage: false,
+      },
+    });
   }
 };
 
@@ -421,57 +507,307 @@ const UniqueArtist = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+// const getSongsByAlbum = async (req, res) => {
+//   try {
+//     const { albumId } = req.query;
+//     if (!albumId) {
+//       return res.status(400).json({ error: "albumId query is required" });
+//     }
+
+//     const album = await Album.findById(albumId).populate({
+//       path: "albumSong",
+//     });
+
+//     const artist = await Artist.findOne({ artistAlbum: albumId });
+
+//     if (!album) {
+//       return res.status(404).json({ error: "Album not found" });
+//     }
+
+//     res.json({
+//       albumName: album.albumName,
+//       songs: album.albumSong,
+//       artistName: artist ? artist.artistName : "Unknown Artist",
+//     });
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// };
+
 const getSongsByAlbum = async (req, res) => {
   try {
-    const { albumId } = req.query;
+    const {
+      albumId,
+      page = 1,
+      limit = 10,
+      search = "",
+      sortBy = "title",
+      sortOrder = "asc",
+    } = req.query;
+
+    console.log("getSongsByAlbum request params:", {
+      albumId,
+      page,
+      limit,
+      search,
+      sortBy,
+      sortOrder,
+    });
+
     if (!albumId) {
       return res.status(400).json({ error: "albumId query is required" });
     }
 
-    const album = await Album.findById(albumId).populate({
-      path: "albumSong",
-    });
+    // Convert to numbers and validate
+    const pageNum = Math.max(1, parseInt(page));
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit)));
+    const skip = (pageNum - 1) * limitNum;
 
-    const artist = await Artist.findOne({ artistAlbum: albumId });
-
+    // Find the album first
+    const album = await Album.findById(albumId);
     if (!album) {
       return res.status(404).json({ error: "Album not found" });
     }
 
-    res.json({
+    // Find the artist
+    const artist = await Artist.findOne({ artistAlbum: albumId });
+
+    // Build filter for songs in this album
+    const filter = {
+      _id: { $in: album.albumSong }, // Only songs in this album
+    };
+
+    // Add search filter if provided
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { genre: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // Build sort object
+    const sortObj = {};
+    const validSortFields = [
+      "title",
+      "releaseDate",
+      "likesCount",
+      "genre",
+      "length",
+    ];
+    const sortField = validSortFields.includes(sortBy) ? sortBy : "title";
+    sortObj[sortField] = sortOrder === "desc" ? -1 : 1;
+
+    console.log("Database query:", { filter, sortObj, skip, limit: limitNum });
+
+    // Get total count of songs in this album (with search filter)
+    const totalSongs = await Music.countDocuments(filter);
+    console.log("Total songs found in album:", totalSongs);
+
+    // Calculate valid page
+    const totalPages = Math.max(1, Math.ceil(totalSongs / limitNum));
+    const validPage = Math.min(pageNum, totalPages);
+    const validSkip = (validPage - 1) * limitNum;
+
+    // Get paginated songs
+    const songs = await Music.find(filter)
+      .sort(sortObj)
+      .skip(validSkip)
+      .limit(limitNum)
+      .lean();
+
+    console.log("Songs retrieved:", songs.length);
+
+    // Pagination metadata
+    const pagination = {
+      currentPage: validPage,
+      totalPages: totalPages,
+      totalSongs: totalSongs,
+      limit: limitNum,
+      hasNextPage: validPage < totalPages,
+      hasPrevPage: validPage > 1,
+      startIndex: validSkip + 1,
+      endIndex: Math.min(validSkip + limitNum, totalSongs),
+    };
+
+    console.log("Response pagination:", pagination);
+
+    const response = {
       albumName: album.albumName,
-      songs: album.albumSong,
+      songs: songs,
       artistName: artist ? artist.artistName : "Unknown Artist",
-    });
+      albumId: albumId,
+      pagination: pagination,
+    };
+
+    res.json(response);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error fetching album songs:", err);
+    res.status(500).json({
+      error: err.message,
+      albumName: "Unknown Album",
+      songs: [],
+      artistName: "Unknown Artist",
+      pagination: {
+        currentPage: 1,
+        totalPages: 0,
+        totalSongs: 0,
+        limit: 10,
+        hasNextPage: false,
+        hasPrevPage: false,
+      },
+    });
   }
 };
 
 const getSongsByPlaylist = async (req, res) => {
   try {
-    const { playlistId } = req.query;
+    const {
+      playlistId,
+      page = 1,
+      limit = 10,
+      search = "",
+      sortBy = "title",
+      sortOrder = "asc",
+    } = req.query;
+
+    console.log("getSongsByPlaylist request params:", {
+      playlistId,
+      page,
+      limit,
+      search,
+      sortBy,
+      sortOrder,
+    });
+
     if (!playlistId) {
       return res.status(400).json({ error: "playlistId is required" });
     }
 
-    const playlist = await Playlist.findById(playlistId).populate({
-      path: "playlistSong",
-      options: { sort: { releaseDate: -1 } },
-    });
+    // Convert to numbers and validate
+    const pageNum = Math.max(1, parseInt(page));
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit)));
+    const skip = (pageNum - 1) * limitNum;
 
+    // Find the playlist first
+    const playlist = await Playlist.findById(playlistId);
     if (!playlist) {
       return res.status(404).json({ error: "Playlist not found" });
     }
 
-    res.json({
+    // Build filter for songs in this playlist
+    const filter = {
+      _id: { $in: playlist.playlistSong }, // Only songs in this playlist
+    };
+
+    // Add search filter if provided
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { genre: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // Build sort object
+    const sortObj = {};
+    const validSortFields = [
+      "title",
+      "releaseDate",
+      "likesCount",
+      "genre",
+      "length",
+    ];
+    const sortField = validSortFields.includes(sortBy) ? sortBy : "title";
+    sortObj[sortField] = sortOrder === "desc" ? -1 : 1;
+
+    // Special handling for default sort (you had releaseDate: -1 in original)
+    if (sortBy === "releaseDate" && sortOrder === "asc") {
+      // If someone specifically wants ascending releaseDate, honor it
+      // Otherwise, your original logic had descending by default
+    }
+
+    console.log("Database query:", { filter, sortObj, skip, limit: limitNum });
+
+    // Get total count of songs in this playlist (with search filter)
+    const totalSongs = await Music.countDocuments(filter);
+    console.log("Total songs found in playlist:", totalSongs);
+
+    // Calculate valid page
+    const totalPages = Math.max(1, Math.ceil(totalSongs / limitNum));
+    const validPage = Math.min(pageNum, totalPages);
+    const validSkip = (validPage - 1) * limitNum;
+
+    // Get paginated songs
+    const songs = await Music.find(filter)
+      .sort(sortObj)
+      .skip(validSkip)
+      .limit(limitNum)
+      .lean();
+
+    console.log("Songs retrieved:", songs.length);
+
+    // Pagination metadata
+    const pagination = {
+      currentPage: validPage,
+      totalPages: totalPages,
+      totalSongs: totalSongs,
+      limit: limitNum,
+      hasNextPage: validPage < totalPages,
+      hasPrevPage: validPage > 1,
+      startIndex: validSkip + 1,
+      endIndex: Math.min(validSkip + limitNum, totalSongs),
+    };
+
+    console.log("Response pagination:", pagination);
+
+    const response = {
       title: playlist.playlistName,
-      songs: playlist.playlistSong,
-    });
+      songs: songs,
+      playlistId: playlistId,
+      pagination: pagination,
+    };
+
+    res.json(response);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error fetching playlist songs:", err);
+    res.status(500).json({
+      error: err.message,
+      title: "Unknown Playlist",
+      songs: [],
+      pagination: {
+        currentPage: 1,
+        totalPages: 0,
+        totalSongs: 0,
+        limit: 10,
+        hasNextPage: false,
+        hasPrevPage: false,
+      },
+    });
   }
 };
+// const getSongsByPlaylist = async (req, res) => {
+//   try {
+//     const { playlistId } = req.query;
+//     if (!playlistId) {
+//       return res.status(400).json({ error: "playlistId is required" });
+//     }
+
+//     const playlist = await Playlist.findById(playlistId).populate({
+//       path: "playlistSong",
+//       options: { sort: { releaseDate: -1 } },
+//     });
+
+//     if (!playlist) {
+//       return res.status(404).json({ error: "Playlist not found" });
+//     }
+
+//     res.json({
+//       title: playlist.playlistName,
+//       songs: playlist.playlistSong,
+//     });
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// };
 
 const artistAlbums = async (req, res) => {
   try {

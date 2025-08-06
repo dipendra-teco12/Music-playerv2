@@ -1,4 +1,4 @@
-<div class="container-box" style="margin-top: 20px">
+<div class="container-box" style="margin-top: 15px">
   <div id="summernote"></div>
   <button id="save-btn" class="btn btn-primary">Save</button>
 </div>
@@ -29,17 +29,32 @@
     });
   });
 
-  $("#save-btn").on("click", function () {
+  $("#save-btn").on("click", async function () {
+    // Use your existing modal function if available, otherwise use confirm
+    const confirmed =
+      typeof showModal === "function"
+        ? await new Promise((resolve) => {
+            showModal({
+              title: "Save Privacy Policy",
+              message: "Are you sure you want to save this privacy policy?",
+              confirmText: "Save",
+              onConfirm: () => resolve(true),
+              onCancel: () => resolve(false),
+            });
+          })
+        : confirm("Are you sure you want to save this privacy policy?");
+
+    if (!confirmed) return;
     // Get the HTML (formatted) content from Summernote
     const htmlContent = $("#summernote").summernote("code");
-    console.log(htmlContent);
+    // console.log(htmlContent);
 
     // Send the HTML content to the server using Axios
     axios
       .post("/admin/save-privacy", { html: htmlContent })
       .then(function (response) {
-        console.log("Data saved successfully:", response.data);
-        alert("Privacy policy saved!");
+        // console.log("Data saved successfully:", response.data);
+        // alert("Privacy policy saved!");
       })
       .catch(function (error) {
         console.error("Error saving data:", error);

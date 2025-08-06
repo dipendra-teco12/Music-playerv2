@@ -57,12 +57,8 @@
     </form>
   </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 <script>
-
-
   $(document).ready(function () {
     const setError = (id, msg) => $("#" + id + "Error").text(msg || "");
 
@@ -121,7 +117,7 @@
         title: "Update Profile",
         message: "Are you sure you want to update your profile?",
         confirmText: "Update",
-        onConfirm: async () => {
+        onConfirm: function () {
           const submitBtn = $("#updateForm")
             .find("button[type='submit']")
             .prop("disabled", true)
@@ -134,36 +130,44 @@
             confirmPassword: $("#confirmPassword").val(),
           };
 
-          try {
-            const res = await axios.patch("/api/auth/update-profile", data);
-            showModal({
-              title: "Success",
-              message: res.data.message || "Profile updated successfully!",
-              confirmText: "OK",
-            });
-            setTimeout(() => location.reload(), 1500);
-          } catch (err) {
-            console.error("Error:", err);
-            if (
-              err.response &&
-              err.response.status === 422 &&
-              err.response.data.error
-            ) {
-              err.response.data.error.forEach((errObj) => {
-                setError(errObj.name, errObj.message);
-              });
-            } else {
+          $.ajax({
+            url: "/api/auth/update-profile",
+            type: "PATCH",
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            success: function (response) {
               showModal({
-                title: "Error",
-                message:
-                  err.response?.data?.message ||
-                  "Update failed. Please try again.",
-                confirmText: "Close",
+                title: "Success",
+                message: response.message || "Profile updated successfully!",
+                confirmText: "OK",
               });
-            }
-          } finally {
-            submitBtn.prop("disabled", false).text("Update Profile");
-          }
+              setTimeout(() => location.reload(), 1500);
+            },
+            error: function (xhr, status, error) {
+              console.error("Error:", error);
+
+              if (
+                xhr.status === 422 &&
+                xhr.responseJSON &&
+                xhr.responseJSON.error
+              ) {
+                xhr.responseJSON.error.forEach((errObj) => {
+                  setError(errObj.name, errObj.message);
+                });
+              } else {
+                showModal({
+                  title: "Error",
+                  message:
+                    xhr.responseJSON?.message ||
+                    "Update failed. Please try again.",
+                  confirmText: "Close",
+                });
+              }
+            },
+            complete: function () {
+              submitBtn.prop("disabled", false).text("Update Profile");
+            },
+          });
         },
       });
     });
