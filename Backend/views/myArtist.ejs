@@ -40,7 +40,7 @@
   async function fetchArtists() {
     try {
       const response = await axios.get("/admin/my-artists");
-      console.log("Fetched artists:", response.data);
+      // console.log("Fetched artists:", response.data);
 
       const uniqueArtists = response.data.uniqueArtists || [];
 

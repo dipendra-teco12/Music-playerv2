@@ -124,11 +124,11 @@
   // Fetch dashboard counts (unchanged)
   async function fetchCounts() {
     try {
-      console.log("Fetching dashboard counts...");
+      // console.log("Fetching dashboard counts...");
       const response = await axios.get("/admin/dashboardcount");
 
       // Log the response to see the actual structure
-      console.log("Dashboard counts response:", response.data);
+      // console.log("Dashboard counts response:", response.data);
 
       // Check if response has the expected structure
       if (response.data) {
@@ -141,7 +141,7 @@
         $("#playlist-box").text(data.totalPlaylists ?? data.playlists ?? 0);
         $("#artist-box").text(data.totalArtists ?? data.artists ?? 0);
 
-        console.log("Counts updated successfully");
+        // console.log("Counts updated successfully");
       } else {
         throw new Error("No data in response");
       }
@@ -194,13 +194,13 @@
             sortOrder: d.order[0].dir,
           };
 
-          console.log("DataTable request params:", params);
+          // console.log("DataTable request params:", params);
           return params;
         },
 
         // This is the crucial part - properly handle the response
         dataSrc: function (response) {
-          console.log("DataTable response:", response);
+          // console.log("DataTable response:", response);
 
           // Check if response has the expected structure
           if (!response.songs || !response.pagination) {
@@ -323,12 +323,12 @@
         const api = this.api();
         const pageInfo = api.page.info();
 
-        console.log("Table drawn:", {
-          page: pageInfo.page + 1,
-          pages: pageInfo.pages,
-          recordsTotal: pageInfo.recordsTotal,
-          recordsDisplay: pageInfo.recordsDisplay,
-        });
+        // console.log("Table drawn:", {
+        //   page: pageInfo.page + 1,
+        //   pages: pageInfo.pages,
+        //   recordsTotal: pageInfo.recordsTotal,
+        //   recordsDisplay: pageInfo.recordsDisplay,
+        // });
 
         // Hide pagination if no data
         if (pageInfo.recordsTotal === 0) {
@@ -343,9 +343,9 @@
       stateSave: false, // Disable state saving to avoid pagination issues
 
       // Custom initialization
-      initComplete: function (settings, json) {
-        console.log("DataTable initialized with data:", json);
-      },
+      // initComplete: function (settings, json) {
+      //   console.log("DataTable initialized with data:", json);
+      // },
     });
   }
 
@@ -383,15 +383,14 @@
       await axios.delete(`/admin/song/${songId}`);
 
       // Refresh the table
-       songsTable.ajax.reload(null, false); // Stay on current page
-
+      songsTable.ajax.reload(null, false); // Stay on current page
 
       // Update counts if function exists
       if (typeof fetchCounts === "function") {
         fetchCounts();
       }
 
-      console.log("Song deleted successfully");
+      // console.log("Song deleted successfully");
     } catch (error) {
       console.error("Delete failed:", error);
       alert("Failed to delete song. Please try again.");

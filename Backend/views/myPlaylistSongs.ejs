@@ -110,12 +110,12 @@
               sortOrder: d.order[0].dir,
             };
 
-            console.log("Playlist songs request params:", params);
+            // console.log("Playlist songs request params:", params);
             return params;
           },
 
           dataSrc: function (response) {
-            console.log("Playlist songs response:", response);
+            // console.log("Playlist songs response:", response);
 
             // Update playlist title when we get the response
             if (response.title && response.title !== currentPlaylistTitle) {
@@ -270,12 +270,12 @@
           const api = this.api();
           const pageInfo = api.page.info();
 
-          console.log("Playlist table drawn:", {
-            page: pageInfo.page + 1,
-            pages: pageInfo.pages,
-            recordsTotal: pageInfo.recordsTotal,
-            recordsDisplay: pageInfo.recordsDisplay,
-          });
+          // console.log("Playlist table drawn:", {
+          //   page: pageInfo.page + 1,
+          //   pages: pageInfo.pages,
+          //   recordsTotal: pageInfo.recordsTotal,
+          //   recordsDisplay: pageInfo.recordsDisplay,
+          // });
 
           // Hide pagination if no data
           if (pageInfo.recordsTotal === 0) {
@@ -285,9 +285,9 @@
           }
         },
 
-        initComplete: function (settings, json) {
-          console.log("Playlist DataTable initialized with data:", json);
-        },
+        // initComplete: function (settings, json) {
+        //   console.log("Playlist DataTable initialized with data:", json);
+        // },
       });
     }
 
@@ -332,7 +332,7 @@
           fetchCounts();
         }
 
-        console.log("Song deleted successfully");
+        // console.log("Song deleted successfully");
       } catch (error) {
         console.error("Delete failed:", error);
         alert("Failed to delete song. Please try again.");

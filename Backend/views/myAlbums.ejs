@@ -41,7 +41,7 @@
     async function fetchAlbums() {
       try {
         const response = await axios.get("/admin/my-albums");
-        console.log("Fetched albums:", response.data);
+        // console.log("Fetched albums:", response.data);
 
         const { uniqueAlbums, relatedArtists } = response.data;
 

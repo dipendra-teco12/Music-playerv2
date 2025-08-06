@@ -112,12 +112,12 @@
               sortOrder: d.order[0].dir,
             };
 
-            console.log("Album songs request params:", params);
+            // console.log("Album songs request params:", params);
             return params;
           },
 
           dataSrc: function (response) {
-            console.log("Album songs response:", response);
+            // console.log("Album songs response:", response);
 
             // Update album title when we get the response
             if (response.albumName && response.albumName !== currentAlbumName) {
@@ -271,12 +271,12 @@
           const api = this.api();
           const pageInfo = api.page.info();
 
-          console.log("Album table drawn:", {
-            page: pageInfo.page + 1,
-            pages: pageInfo.pages,
-            recordsTotal: pageInfo.recordsTotal,
-            recordsDisplay: pageInfo.recordsDisplay,
-          });
+          // console.log("Album table drawn:", {
+          //   page: pageInfo.page + 1,
+          //   pages: pageInfo.pages,
+          //   recordsTotal: pageInfo.recordsTotal,
+          //   recordsDisplay: pageInfo.recordsDisplay,
+          // });
 
           // Hide pagination if no data
           if (pageInfo.recordsTotal === 0) {
@@ -286,9 +286,9 @@
           }
         },
 
-        initComplete: function (settings, json) {
-          console.log("Album DataTable initialized with data:", json);
-        },
+        // initComplete: function (settings, json) {
+        //   console.log("Album DataTable initialized with data:", json);
+        // },
       });
     }
 
@@ -328,7 +328,7 @@
         // Refresh the table
         albumTable.ajax.reload(null, false); // Stay on current page
 
-        console.log("Song deleted successfully");
+        // console.log("Song deleted successfully");
       } catch (error) {
         console.error("Delete failed:", error);
         alert("Failed to delete song. Please try again.");

@@ -39,7 +39,7 @@
     async function fetchPlaylists() {
       try {
         const response = await axios.get("/admin/my-playlists");
-        console.log("Fetched playlists:", response.data);
+        // console.log("Fetched playlists:", response.data);
 
         const { uniquePlaylists } = response.data; 
 

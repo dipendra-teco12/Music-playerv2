@@ -362,11 +362,11 @@ const getAllSongs = async (req, res) => {
     const sortField = validSortFields.includes(sortBy) ? sortBy : "title";
     sortObj[sortField] = sortOrder === "desc" ? -1 : 1;
 
-    console.log("Database query:", { filter, sortObj, skip, limit: limitNum });
+    // console.log("Database query:", { filter, sortObj, skip, limit: limitNum });
 
     // Get total count FIRST (before pagination)
     const totalSongs = await Music.countDocuments(filter);
-    console.log("Total songs found:", totalSongs);
+    // console.log("Total songs found:", totalSongs);
 
     // Calculate if the requested page is valid
     const totalPages = Math.max(1, Math.ceil(totalSongs / limitNum));
@@ -380,7 +380,7 @@ const getAllSongs = async (req, res) => {
       .limit(limitNum)
       .lean();
 
-    console.log("Songs retrieved:", musics.length);
+    // console.log("Songs retrieved:", musics.length);
 
     // Get artists (consider optimizing this if you have many artists)
     const artists = await Artist.find().lean();
@@ -418,7 +418,7 @@ const getAllSongs = async (req, res) => {
       endIndex: Math.min(validSkip + limitNum, totalSongs),
     };
 
-    console.log("Response pagination:", pagination);
+    // console.log("Response pagination:", pagination);
 
     const response = {
       songs: enrichedSongs,
@@ -545,14 +545,14 @@ const getSongsByAlbum = async (req, res) => {
       sortOrder = "asc",
     } = req.query;
 
-    console.log("getSongsByAlbum request params:", {
-      albumId,
-      page,
-      limit,
-      search,
-      sortBy,
-      sortOrder,
-    });
+    // console.log("getSongsByAlbum request params:", {
+    //   albumId,
+    //   page,
+    //   limit,
+    //   search,
+    //   sortBy,
+    //   sortOrder,
+    // });
 
     if (!albumId) {
       return res.status(400).json({ error: "albumId query is required" });
@@ -597,11 +597,11 @@ const getSongsByAlbum = async (req, res) => {
     const sortField = validSortFields.includes(sortBy) ? sortBy : "title";
     sortObj[sortField] = sortOrder === "desc" ? -1 : 1;
 
-    console.log("Database query:", { filter, sortObj, skip, limit: limitNum });
+    // console.log("Database query:", { filter, sortObj, skip, limit: limitNum });
 
     // Get total count of songs in this album (with search filter)
     const totalSongs = await Music.countDocuments(filter);
-    console.log("Total songs found in album:", totalSongs);
+    // console.log("Total songs found in album:", totalSongs);
 
     // Calculate valid page
     const totalPages = Math.max(1, Math.ceil(totalSongs / limitNum));
@@ -615,7 +615,7 @@ const getSongsByAlbum = async (req, res) => {
       .limit(limitNum)
       .lean();
 
-    console.log("Songs retrieved:", songs.length);
+    // console.log("Songs retrieved:", songs.length);
 
     // Pagination metadata
     const pagination = {
@@ -629,7 +629,7 @@ const getSongsByAlbum = async (req, res) => {
       endIndex: Math.min(validSkip + limitNum, totalSongs),
     };
 
-    console.log("Response pagination:", pagination);
+    // console.log("Response pagination:", pagination);
 
     const response = {
       albumName: album.albumName,
@@ -670,14 +670,14 @@ const getSongsByPlaylist = async (req, res) => {
       sortOrder = "asc",
     } = req.query;
 
-    console.log("getSongsByPlaylist request params:", {
-      playlistId,
-      page,
-      limit,
-      search,
-      sortBy,
-      sortOrder,
-    });
+    // console.log("getSongsByPlaylist request params:", {
+    //   playlistId,
+    //   page,
+    //   limit,
+    //   search,
+    //   sortBy,
+    //   sortOrder,
+    // });
 
     if (!playlistId) {
       return res.status(400).json({ error: "playlistId is required" });
@@ -725,11 +725,11 @@ const getSongsByPlaylist = async (req, res) => {
       // Otherwise, your original logic had descending by default
     }
 
-    console.log("Database query:", { filter, sortObj, skip, limit: limitNum });
+    // console.log("Database query:", { filter, sortObj, skip, limit: limitNum });
 
     // Get total count of songs in this playlist (with search filter)
     const totalSongs = await Music.countDocuments(filter);
-    console.log("Total songs found in playlist:", totalSongs);
+    // console.log("Total songs found in playlist:", totalSongs);
 
     // Calculate valid page
     const totalPages = Math.max(1, Math.ceil(totalSongs / limitNum));
@@ -743,7 +743,7 @@ const getSongsByPlaylist = async (req, res) => {
       .limit(limitNum)
       .lean();
 
-    console.log("Songs retrieved:", songs.length);
+    // console.log("Songs retrieved:", songs.length);
 
     // Pagination metadata
     const pagination = {
@@ -757,7 +757,7 @@ const getSongsByPlaylist = async (req, res) => {
       endIndex: Math.min(validSkip + limitNum, totalSongs),
     };
 
-    console.log("Response pagination:", pagination);
+    // console.log("Response pagination:", pagination);
 
     const response = {
       title: playlist.playlistName,

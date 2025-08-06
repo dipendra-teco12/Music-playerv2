@@ -44,7 +44,7 @@
       const response = await axios.get(
         `/admin/api/myArtists/albums?artistId=${artistId}`
       );
-      console.log("Fetched artist albums:", response.data);
+      // console.log("Fetched artist albums:", response.data);
 
       const { artistName, albums } = response.data;
 
