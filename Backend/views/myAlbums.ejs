@@ -16,8 +16,13 @@
       </div>
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item"><a href="/admin/dashboard">Home</a></li>
-          <li class="breadcrumb-item active">Dashboard</li>
+          <!-- <li class="breadcrumb-item"><a href="/admin/dashboard">Home</a></li>
+          <li class="breadcrumb-item active">Dashboard</li> -->
+           <a href="/admin/addAlbum"
+            ><button class="btn btn-primary ml-2">
+            Add Album
+            </button></a
+          >
         </ol>
       </div>
     </div>
@@ -98,6 +103,11 @@ const artist = artistMap.get(album._id.toString());
         $("#albumContainer").html(
           '<p class="text-danger">Failed to load albums.</p>'
         );
+            if (err.response.status == 404) {
+          window.location.href = "/admin/error-404";
+        } else {
+          window.location.href = "/admin/error-500";
+        }
       }
     }
 

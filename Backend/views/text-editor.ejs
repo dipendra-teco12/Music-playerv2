@@ -1,6 +1,6 @@
 <div class="container-box" style="margin-top: 20px">
   <div id="summernote"></div>
-  <button id="save-btn">Save</button>
+  <button id="save-btn" class="btn btn-primary">Save</button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -24,7 +24,7 @@
         console.error("Error loading privacy policy:", error);
       });
     $(document).on("hidden.bs.modal", ".note-modal", function () {
-      // Move focus to Summernote editor or any safe 
+      // Move focus to Summernote editor or any safe
       $(".note-editable").focus();
     });
   });

@@ -4,6 +4,25 @@
     <span class="brand-text font-weight-light">Music Player</span>
   </a>
 
+  <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+    <div class="image">
+      <img
+        src="/img/user1.jpg"
+        class="img-circle elevation-2"
+        alt="User Image"
+      />
+    </div>
+    <div class="info">
+      <a
+        href="/admin/profile"
+        class="d-block brand-text font-weight-light"
+        style="color: aliceblue; font-size: 20px; text-decoration: none"
+        ><%= (typeof user !== 'undefined' && user.fullName) ? user.fullName :
+        'Admin' %>
+      </a>
+    </div>
+  </div>
+
   <div class="sidebar">
     <nav class="mt-2">
       <ul
@@ -21,7 +40,7 @@
           </a>
         </li>
 
-        <li class="nav-item">
+        <!-- <li class="nav-item">
           <a
             href="/admin/uploadsong"
             class="nav-link <%= activePage === 'uploadsong' ? 'active' : '' %>"
@@ -29,8 +48,8 @@
             <i class="nav-icon fas fa-cloud-upload-alt"></i>
             <p>Upload Song</p>
           </a>
-        </li>
-
+        </li> -->
+        <!-- 
         <li class="nav-item">
           <a
             href="/admin/addAlbum"
@@ -39,7 +58,7 @@
             <i class="nav-icon fas fa-plus-circle"></i>
             <p>Add Album</p>
           </a>
-        </li>
+        </li> -->
 
         <li class="nav-item">
           <a
@@ -91,22 +110,18 @@
           </a>
         </li>
 
-        <li class="nav-item">
+        <!-- <li class="nav-item">
           <a href="/api/auth/logout" class="nav-link">
             <i class="nav-icon fas fa-sign-out-alt"></i>
             <p>Logout</p>
           </a>
-        </li>
+        </li> -->
 
-        <li >
-          <a class="<%= activePage === '500' ? 'active' : '' %>">
-            
-          </a>
+        <li>
+          <a class="<%= activePage === '500' ? 'active' : '' %>"> </a>
         </li>
-        <li >
-          <a class=" <%= activePage === '404' ? 'active' : '' %>">
-            
-          </a>
+        <li>
+          <a class="<%= activePage === '404' ? 'active' : '' %>"> </a>
         </li>
       </ul>
     </nav>

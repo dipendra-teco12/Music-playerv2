@@ -83,6 +83,11 @@
         $("#playlistContainer").html(
           '<p class="text-danger">Failed to load playlists.</p>'
         );
+            if (err.response.status == 404) {
+          window.location.href = "/admin/error-404";
+        } else {
+          window.location.href = "/admin/error-500";
+        }
       }
     }
 

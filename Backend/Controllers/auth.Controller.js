@@ -40,6 +40,43 @@ const signup = async (req, res) => {
   }
 };
 
+const updateProfile = async (req, res) => {
+  try {
+    const updateFields = {};
+    const { fullName, email, password } = req.body;
+
+    if (fullName) updateFields.fullName = fullName;
+    if (email) updateFields.email = email;
+    if (password) {
+      updateFields.password = await bcrypt.hash(password, 10);
+    }
+
+    const updated = await User.findByIdAndUpdate(
+      { _id: req.user.id },
+      { $set: updateFields },
+      { new: true }
+    );
+
+  
+    const accessToken = generateAccessToken(updated);
+
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "Strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.status(200).json({
+      message: "Profile updated",
+      user: { fullName: updated.fullName, email: updated.email },
+    });
+  } catch (err) {
+    console.error("Error while updating user", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -293,4 +330,5 @@ module.exports = {
   forgetPassword,
   resetPassword,
   verifyOtp,
+  updateProfile,
 };

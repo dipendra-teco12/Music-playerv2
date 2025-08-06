@@ -171,6 +171,13 @@ router.get("/myPlaylists/songs", authenticateToken, isAdmin, (req, res) => {
   });
 });
 
+router.get("/profile", authenticateToken, isAdmin, (req, res) => {
+  res.render("profile", {
+    title: "undefinded",
+    activePage: "undefined",
+  });
+});
+
 router.get("/dashboardcount", authenticateToken, dashboardCount);
 
 router.get("/songs", authenticateToken, getAllSongs);

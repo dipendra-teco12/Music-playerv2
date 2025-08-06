@@ -15,6 +15,9 @@ const authenticateToken = async (req, res, next) => {
     const decoded = verifyAccessToken(token);
     req.user = decoded;
 
+    res.locals.user = decoded;
+    
+
     next();
   } catch (err) {
     console.error("Auth Error:", err);

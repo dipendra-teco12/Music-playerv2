@@ -6,8 +6,11 @@
       </div>
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item"><a href="/admin/dashboard">Home</a></li>
-          <li class="breadcrumb-item active">Dashboard</li>
+          <!-- <li class="breadcrumb-item"><a href="/admin/dashboard">Home</a></li>
+          <li class="breadcrumb-item active">Dashboard</li> -->
+          <a href="/admin/uploadsong"
+            ><button class="btn btn-primary ml-2">Upload Song</button></a
+          >
         </ol>
       </div>
     </div>
@@ -192,80 +195,93 @@
   }
 
   // Delete handler - completely rebuild table after deletion
+  // Delete handler - completely rebuild table after deletion
   $(document).on("click", ".delete-btn", async function () {
-    const id = $(this).data("id");
-    const $button = $(this);
-    const $row = $button.closest("tr");
+    showModal({
+      title: "Delete Song",
+      message: "Are you sure you want to delete song?",
+      confirmText: "Delete",
+      onConfirm: async () => {
+        const id = $(this).data("id");
+        const $button = $(this);
+        const $row = $button.closest("tr");
 
-    if (!id) {
-      alert("Invalid song ID");
-      return;
-    }
+        if (!id) {
+          alert("Invalid song ID");
+          return;
+        }
 
-    if (!confirm("Are you sure you want to delete this song?")) return;
+        try {
+          // Visual feedback
+          $button
+            .prop("disabled", true)
+            .html('<i class="fas fa-spinner fa-spin"></i>');
+          $row.addClass("row-deleting");
 
-    try {
-      // Visual feedback
-      $button
-        .prop("disabled", true)
-        .html('<i class="fas fa-spinner fa-spin"></i>');
-      $row.addClass("row-deleting");
+          // Make delete request
+          await axios.delete(`/admin/song/${id}`);
 
-      // Make delete request
-      await axios.delete(`/admin/song/${id}`);
+          // Remove from local data array
+          songsData = songsData.filter((song) => song._id !== id);
 
-      // Remove from local data array
-      songsData = songsData.filter((song) => song._id !== id);
+          // Rebuild entire table with updated data
+          rebuildTable(songsData);
 
-      // Rebuild entire table with updated data
-      rebuildTable(songsData);
+          // Update counts after successful deletion
+          if (typeof fetchCounts === "function") {
+            fetchCounts();
+          }
 
-      // Update counts after successful deletion
-      if (typeof fetchCounts === "function") {
-        fetchCounts();
-      }
+          // console.log("Song deleted successfully");
+        } catch (error) {
+          console.error("Delete failed:", error);
+          alert("Failed to delete song. Please try again.");
 
-      // console.log("Song deleted successfully");
-    } catch (error) {
-      console.error("Delete failed:", error);
-      alert("Failed to delete song. Please try again.");
-
-      // Restore button state on error
-      $button.prop("disabled", false).html('<i class="fas fa-trash"></i>');
-      $row.removeClass("row-deleting");
-    }
+          // Restore button state on error
+          $button.prop("disabled", false).html('<i class="fas fa-trash"></i>');
+          $row.removeClass("row-deleting");
+        }
+      },
+    });
   });
 
   $(document).on("click", ".edit-btn", async function () {
-    const songId = $(this).data("id");
-    if (!songId) {
-      alert("Invalid song ID");
-      return;
-    }
+    showModal({
+      title: "Edit Song",
+      message: "Are you sure you want to edit song?",
+      confirmText: "Edit",
+      onConfirm: async () => {
+        const songId = $(this).data("id");
+        if (!songId) {
+          alert("Invalid song ID");
+          return;
+        }
 
-    try {
-      // Show loading state on button
-      const $button = $(this);
-      const originalHtml = $button.html();
-      $button
-        .prop("disabled", true)
-        .html('<i class="fas fa-spinner fa-spin"></i>');
+        try {
+          // Show loading state on button
+          const $button = $(this);
+          const originalHtml = $button.html();
+          $button
+            .prop("disabled", true)
+            .html('<i class="fas fa-spinner fa-spin"></i>');
 
-      const response = await axios.get(`/api/song/track/${songId}`);
-      const song = response.data;
+          const response = await axios.get(`/api/song/track/${songId}`);
+          const song = response.data;
 
-      if (song.singleTrack === true) {
-        window.location.href = `/admin/uploadSong?mode=edit&id=${songId}`;
-      } else {
-        window.location.href = `/admin/addAlbum?mode=edit&id=${songId}`;
-      }
-    } catch (error) {
-      console.error("Error fetching song data for editing:", error);
-      alert("Failed to load song data. Please try again.");
+          if (song.singleTrack === true) {
+            window.location.href = `/admin/uploadSong?mode=edit&id=${songId}`;
+          } else {
+            window.location.href = `/admin/addAlbum?mode=edit&id=${songId}`;
+          }
+        } catch (error) {
+          console.error("Error fetching song data for editing:", error);
+          alert("Failed to load song data. Please try again.");
 
-      // Restore button state on error
-      $button.prop("disabled", false).html(originalHtml);
-    }
+          // Restore button state on error
+          $button.prop("disabled", false).html(originalHtml);
+        }
+      },
+    });
   });
   $(document).ready(() => {
     fetchCounts();

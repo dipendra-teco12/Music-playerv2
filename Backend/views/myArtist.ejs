@@ -87,6 +87,11 @@
       $("#artistContainer").html(
         '<p class="text-danger">Failed to load artists.</p>'
       );
+      if (err.response.status == 404) {
+        window.location.href = "/admin/error-404";
+      } else {
+        window.location.href = "/admin/error-500";
+      }
     }
   }
 

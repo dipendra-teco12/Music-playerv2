@@ -7,6 +7,7 @@ const {
   forgetPassword,
   resetPassword,
   verifyOtp,
+  updateProfile,
 } = require("../Controllers/auth.Controller");
 const authenticateToken = require("../Middlewares/authMiddleware");
 const router = express.Router();
@@ -18,5 +19,7 @@ router.get("/logout", logout);
 router.post("/forgetpassword", forgetPassword);
 router.post("/verifyotp", verifyOtp);
 router.post("/resetPassword", authenticateToken, resetPassword);
+
+router.patch("/update-profile/", authenticateToken, updateProfile);
 
 module.exports = router;

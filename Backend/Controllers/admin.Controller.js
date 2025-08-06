@@ -16,15 +16,8 @@ const {
 
 const uploadSong = async (req, res) => {
   try {
-    const {
-      title,
-      artistName,
-      length,
-      genre,
-      playlist,
-      releaseDate,
-      lyrics,
-    } = req.body;
+    const { title, artistName, length, genre, playlist, releaseDate, lyrics } =
+      req.body;
 
     if (!title || !genre || !playlist || !releaseDate) {
       return res.status(400).json({ message: "Missing required fields" });
