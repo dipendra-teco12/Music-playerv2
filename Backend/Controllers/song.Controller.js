@@ -233,8 +233,54 @@ const oldestSongs = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+const Artist = require("../Models/artist.Model");
 
+const getArtistSongs = async (req, res) => {
+  try {
+    const { artistId } = req.params;
+    if (!artistId)
+      return res.status(400).json({ message: "Artist Id Required" });
+    const artist = await Artist.findById({ _id: artistId }).populate(
+      "artistSong"
+    );
+    if (!artist) {
+      return res.status(404).json({ error: "Artist not found" });
+    }
+    res.json({ songs: artist.artistSong });
+  } catch (err) {
+    console.error("Error while fetching artist", err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
 
+const getArtistAlbums = async (req, res) => {
+  try {
+    const { artistId } = req.params;
+    if (!artistId)
+      return res.status(400).json({ message: "Artist Id Required" });
+    const artist = await Artist.findById({ _id: artistId }).populate(
+      "artistAlbum"
+    );
+    if (!artist) return res.status(404).json({ error: "Artist not found" });
+    res.json({ albums: artist.artistAlbum });
+  } catch (err) {
+    console.error("Error while fetching artist album", err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+const getAllArtists = async (req, res) => {
+  try {
+    const artists = await Artist.find();
+    if (!artists.length) {
+      return res.status(404).json({ error: "No artists found" });
+    }
+    res.status(200).json({ artists });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
 
 module.exports = {
   addFavoriteSong,
@@ -248,4 +294,7 @@ module.exports = {
   topWeeklySongs,
   getAllVideoSongs,
   oldestSongs,
+  getArtistSongs,
+  getArtistAlbums,
+  getAllArtists,
 };

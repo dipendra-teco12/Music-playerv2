@@ -12,8 +12,12 @@ const {
   topWeeklySongs,
   getAllVideoSongs,
   oldestSongs,
+  recommendedArtist,
+  getArtistSongs,
+  getAllArtists,
 } = require("../Controllers/song.Controller");
 const authenticateToken = require("../Middlewares/authMiddleware");
+const { artistAlbums } = require("../Controllers/admin.Controller");
 
 router.post("/favorite-song", authenticateToken, addFavoriteSong);
 
@@ -35,5 +39,11 @@ router.get("/top-weekly", authenticateToken, topWeeklySongs);
 router.get("/video-songs", authenticateToken, getAllVideoSongs);
 
 router.get("/old-songs", authenticateToken, oldestSongs);
+
+router.get("/artist-songs/:artistId", authenticateToken, getArtistSongs);
+
+router.get("/artist-album/:artistId", authenticateToken, artistAlbums);
+
+router.get("/allArtist".authenticateToken, getAllArtists);
 
 module.exports = router;
