@@ -1,8 +1,32 @@
+<style>
+  .form-control {
+    height: 40px; /* Fixed height to avoid resizing */
+    padding: 10px;
+    box-sizing: border-box; /* To include padding in the height calculation */
+  }
+
+  .text-danger {
+    font-size: 0.875rem;
+    color: #dc3545;
+    margin-top: 5px;
+    min-height: 20px; /* Ensure error message space doesn't shrink or grow */
+    padding-left: 5px; /* Optional: for better alignment */
+  }
+
+  .mb-3 {
+    position: relative;
+  }
+
+  /* Ensure the error message appears below the input */
+  .text-danger {
+    margin-top: 8px;
+  }
+</style>
 <div class="content-header">
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-6">
-        <h1 class="m-0">Update Details</h1>
+        <h1 class="m-0">Update Profile Details</h1>
       </div>
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
@@ -17,55 +41,61 @@
 <div class="" id="updateProfileForm">
   <div class="card-body">
     <form id="updateForm" novalidate>
-      <div class="mb-3">
-        <label for="fullName">Full Name</label>
-        <input
-          type="text"
-          name="fullName"
-          id="fullName"
-          class="form-control"
-          value="<%= user.fullName || '' %>"
-          required
-          minlength="2"
-        />
-        <div class="text-danger mt-1" id="fullNameError"></div>
+      <!-- Full Name and Email in one row -->
+      <div class="mb-3 row">
+        <div class="col-sm-6">
+          <label for="fullName">Full Name</label>
+          <input
+            type="text"
+            name="fullName"
+            id="fullName"
+            class="form-control"
+            value="<%= user.fullName || '' %>"
+            required
+            minlength="2"
+          />
+          <div class="text-danger mt-1" id="fullNameError"></div>
+        </div>
+
+        <div class="col-sm-6">
+          <label for="email">Email address</label>
+          <input
+            type="email"
+            name="email"
+            id="email"
+            class="form-control"
+            value="<%= user.email || '' %>"
+            required
+          />
+          <div class="text-danger mt-1" id="emailError"></div>
+        </div>
       </div>
-      <div class="mb-3">
-        <label for="email">Email address</label>
-        <input
-          type="email"
-          name="email"
-          id="email"
-          class="form-control"
-          value="<%= user.email || '' %>"
-          required
-        />
-        <div class="text-danger mt-1" id="emailError"></div>
-        <!-- Corrected -->
-      </div>
-      <div class="mb-3">
-        <label for="password">New Password</label>
-        <input
-          type="password"
-          name="password"
-          id="password"
-          class="form-control"
-          minlength="8"
-        />
-        <div class="text-danger mt-1" id="passwordError"></div>
-        <!-- Corrected -->
-      </div>
-      <div class="mb-3">
-        <label for="confirmPassword">Confirm Password</label>
-        <input
-          type="password"
-          name="confirmPassword"
-          id="confirmPassword"
-          class="form-control"
-          minlength="8"
-        />
-        <div class="text-danger mt-1" id="confirmPasswordError"></div>
-        <!-- Corrected -->
+
+      <!-- Password and Confirm Password in one row -->
+      <div class="mb-3 row">
+        <div class="col-sm-6">
+          <label for="password">New Password</label>
+          <input
+            type="password"
+            name="password"
+            id="password"
+            class="form-control"
+            minlength="8"
+          />
+          <div class="text-danger mt-1" id="passwordError"></div>
+        </div>
+
+        <div class="col-sm-6">
+          <label for="confirmPassword">Confirm Password</label>
+          <input
+            type="password"
+            name="confirmPassword"
+            id="confirmPassword"
+            class="form-control"
+            minlength="8"
+          />
+          <div class="text-danger mt-1" id="confirmPasswordError"></div>
+        </div>
       </div>
 
       <button type="submit" class="btn btn-primary">Update Profile</button>

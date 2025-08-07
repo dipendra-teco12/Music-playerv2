@@ -686,7 +686,7 @@ const getSongsByPlaylist = async (req, res) => {
     // Convert to numbers and validate
     const pageNum = Math.max(1, parseInt(page));
     const limitNum = Math.min(100, Math.max(1, parseInt(limit)));
-    const skip = (pageNum - 1) * limitNum;
+    // const skip = (pageNum - 1) * limitNum;
 
     // Find the playlist first
     const playlist = await Playlist.findById(playlistId);
