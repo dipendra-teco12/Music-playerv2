@@ -266,7 +266,9 @@
     song: <%- JSON.stringify(song || {}) %>
   };
 
-  $(function () {
+$(document).ready(function () {
+    // Ensure form doesn't have default submission behavior
+    $("#uploadForm").removeAttr("action").removeAttr("method");
     const setError = (id, msg) => $("#" + id + "Error").text(msg || "");
 
     // Check if we're in edit mode from URL parameters
@@ -529,9 +531,20 @@
       setError(fieldId, "");
     });
 
+    // Additional safety: prevent form submission on button click if validation fails
+    $("#submitBtn").on("click", function(e) {
+      console.log("Submit button clicked"); // Debug log
+      // Let the form submit event handler take care of validation
+    });
+
     $("#uploadForm").on("submit", async function (e) {
       e.preventDefault();
+      e.stopPropagation();
+      
+      console.log("Form submitted - validation starting..."); // Debug log
+      
       if (!validateForm()) {
+        console.log("Validation failed"); // Debug log
         // Scroll to first error
         const firstErrorField = $(".error-message")
           .filter(function () {
@@ -544,13 +557,34 @@
             block: "center",
           });
         }
-        return;
+        console.log("Validation errors found, form submission stopped"); // Debug log
+        return false; // Explicitly return false
       }
 
-      const $btn = $("#submitBtn").prop("disabled", true);
+      const $btn = $("#submitBtn");
       const mode = $(this).attr("data-mode") || "create";
       
-      $btn.text(mode === "edit" ? "Updating..." : "Uploading...");
+      // Show confirmation modal before proceeding
+      const confirmed = typeof showModal === "function"
+        ? await new Promise((resolve) => {
+            showModal({
+              title: mode === "edit" ? "Update Song" : "Upload Song",
+              message: mode === "edit" 
+                ? "Are you sure you want to update this song?" 
+                : "Are you sure you want to upload this song?",
+              confirmText: mode === "edit" ? "Update" : "Upload",
+              onConfirm: () => resolve(true),
+              onCancel: () => resolve(false),
+            });
+          })
+        : confirm(mode === "edit" 
+            ? "Are you sure you want to update this song?" 
+            : "Are you sure you want to upload this song?");
+
+      if (!confirmed) return;
+
+      // Disable button and show loading state
+      $btn.prop("disabled", true).text(mode === "edit" ? "Updating..." : "Uploading...");
 
       const url = mode === "edit" 
         ? `/admin/update-song/${songId}` 
@@ -567,34 +601,133 @@
       formData.set("genre", $("#genreSelect").val());
       formData.set("playlist", $("#playlistSelect").val());
 
+try {
+  const res = await axios({
+    url,
+    method,
+    data: formData,
+    headers: { "Content-Type": "multipart/form-data" },
+    withCredentials: true,
+  });
+  
+  console.log("Success response received:", res);
+  console.log("showModal function available:", typeof showModal);
+  console.log("Window showModal available:", typeof window.showModal);
+  
+  const successMessage = mode === "edit" ? "Song updated successfully!" : "Song uploaded successfully!";
+  
+  // Wait a bit to ensure all scripts are loaded, then try to show modal
+  setTimeout(() => {
+    console.log("Attempting to show success modal...");
+    
+    if (typeof showModal === "function") {
+      console.log("Using global showModal function");
       try {
-        const res = await axios({
-          url,
-          method,
-          data: formData,
-          headers: { "Content-Type": "multipart/form-data" },
-          withCredentials: true,
+        showModal({
+          title: "Success",
+          message: successMessage,
+          confirmText: "OK",
+          showCancel: false,
+          onConfirm: () => {
+            console.log("Success modal confirmed, redirecting...");
+            window.location.href = "/admin/dashboard";
+          },
+          onCancel: () => {
+            console.log("Success modal cancelled (should not happen)");
+            window.location.href = "/admin/dashboard";
+          }
         });
-        
-        alert(mode === "edit" ? "Updated successfully!" : "Song uploaded successfully!");
-        
-        // After successful update, redirect back to dashboard
-        if (mode === "edit") {
-          window.location.href = "/admin/dashboard";
-          return;
-        } else {
-          this.reset();
-          $(".custom-file-label").text("Choose file");
-          $("#genreSelect").val("");
-          $("#playlistSelect").val("");
-          window.location.href = "/admin/dashboard";
-        }
-      } catch (err) {
-        const msg = err.response?.data?.message || (mode === "edit" ? "Update failed" : "Upload failed");
+        console.log("showModal called successfully");
+      } catch (modalError) {
+        console.error("Error calling showModal:", modalError);
+        alert(successMessage);
+        window.location.href = "/admin/dashboard";
+      }
+    } else if (typeof window.showModal === "function") {
+      console.log("Using window.showModal function");
+      try {
+        window.showModal({
+          title: "Success",
+          message: successMessage,
+          confirmText: "OK",
+          showCancel: false,
+          onConfirm: () => {
+            console.log("Success modal confirmed, redirecting...");
+            window.location.href = "/admin/dashboard";
+          },
+          onCancel: () => {
+            console.log("Success modal cancelled (should not happen)");
+            window.location.href = "/admin/dashboard";
+          }
+        });
+        console.log("window.showModal called successfully");
+      } catch (modalError) {
+        console.error("Error calling window.showModal:", modalError);
+        alert(successMessage);
+        window.location.href = "/admin/dashboard";
+      }
+    } else {
+      console.log("No modal function found, using alert");
+      alert(successMessage);
+      window.location.href = "/admin/dashboard";
+    }
+  }, 200); // Small delay to ensure everything is ready
+  
+} catch (err) {
+  console.error("Request failed:", err);
+  const msg = err.response?.data?.message || (mode === "edit" ? "Update failed" : "Upload failed");
+  
+  console.log("Showing error modal");
+  
+  setTimeout(() => {
+    if (typeof showModal === "function") {
+      try {
+        showModal({
+          title: "Error",
+          message: msg,
+          confirmText: "OK",
+          showCancel: false,
+          onConfirm: () => {
+            console.log("Error modal confirmed, resetting button");
+            $btn.prop("disabled", false).text(mode === "edit" ? "Update" : "Upload");
+          },
+          onCancel: () => {
+            console.log("Error modal cancelled");
+            $btn.prop("disabled", false).text(mode === "edit" ? "Update" : "Upload");
+          }
+        });
+      } catch (modalError) {
+        console.error("Error showing error modal:", modalError);
         alert(msg);
-        console.error(err);
         $btn.prop("disabled", false).text(mode === "edit" ? "Update" : "Upload");
       }
+    } else if (typeof window.showModal === "function") {
+      try {
+        window.showModal({
+          title: "Error",
+          message: msg,
+          confirmText: "OK",
+          showCancel: false,
+          onConfirm: () => {
+            console.log("Error modal confirmed, resetting button");
+            $btn.prop("disabled", false).text(mode === "edit" ? "Update" : "Upload");
+          },
+          onCancel: () => {
+            console.log("Error modal cancelled");
+            $btn.prop("disabled", false).text(mode === "edit" ? "Update" : "Upload");
+          }
+        });
+      } catch (modalError) {
+        console.error("Error showing window error modal:", modalError);
+        alert(msg);
+        $btn.prop("disabled", false).text(mode === "edit" ? "Update" : "Upload");
+      }
+    } else {
+      alert(msg);
+      $btn.prop("disabled", false).text(mode === "edit" ? "Update" : "Upload");
+    }
+  }, 200);
+}
     });
   });
 </script>

@@ -18,10 +18,8 @@
         <ol class="breadcrumb float-sm-right">
           <!-- <li class="breadcrumb-item"><a href="/admin/dashboard">Home</a></li>
           <li class="breadcrumb-item active">Dashboard</li> -->
-           <a href="/admin/addAlbum"
-            ><button class="btn btn-primary ml-2">
-            Add Album
-            </button></a
+          <a href="/admin/addAlbum"
+            ><button class="btn btn-primary ml-2">Add Album</button></a
           >
         </ol>
       </div>
@@ -35,42 +33,39 @@
     </div>
   </div>
 </div>
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script>
-    async function fetchAlbums() {
-      try {
-        const response = await axios.get("/admin/my-albums");
-        // console.log("Fetched albums:", response.data);
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  async function fetchAlbums() {
+    try {
+      const response = await axios.get("/admin/my-albums");
+      // console.log("Fetched albums:", response.data);
 
-        const { uniqueAlbums, relatedArtists } = response.data;
+      const { uniqueAlbums, relatedArtists } = response.data;
 
-       
-        const limitedAlbums = uniqueAlbums;
+      const limitedAlbums = uniqueAlbums;
 
-    
-        $("#albumContainer").empty();
+      $("#albumContainer").empty();
 
-     
-        limitedAlbums.forEach((album) => {
-         const artistMap = new Map();
-relatedArtists.forEach((artist) => {
-  const albums = Array.isArray(artist.artistAlbum)
-    ? artist.artistAlbum
-    : [artist.artistAlbum];
+      limitedAlbums.forEach((album) => {
+        const artistMap = new Map();
+        relatedArtists.forEach((artist) => {
+          const albums = Array.isArray(artist.artistAlbum)
+            ? artist.artistAlbum
+            : [artist.artistAlbum];
 
-  albums.forEach((albumId) => {
-    const key = albumId?.toString();
-    if (key) artistMap.set(key, artist);
-  });
-});
-const artist = artistMap.get(album._id.toString());
+          albums.forEach((albumId) => {
+            const key = albumId?.toString();
+            if (key) artistMap.set(key, artist);
+          });
+        });
+        const artist = artistMap.get(album._id.toString());
 
-          const imageUrl = album.albumImage?.trim()
-            ? album.albumImage
-            : "https://res.cloudinary.com/dfciwmday/image/upload/v1752753992/MusicApp/defaults/songImage_scnkvu.jpg";
+        const imageUrl = album.albumImage?.trim()
+          ? album.albumImage
+          : "https://res.cloudinary.com/dfciwmday/image/upload/v1752753992/MusicApp/defaults/songImage_scnkvu.jpg";
 
-          const cardHTML = `
+        const cardHTML = `
   <div class="col-md-12 col-lg-6 col-xl-3">
     <a href="/admin/myAlbums/songs?albumId=${
       album._id
@@ -91,29 +86,26 @@ const artist = artistMap.get(album._id.toString());
   </div>
 `;
 
-          $("#albumContainer").append(cardHTML);
-        });
-          if (!uniqueAlbums.length) {
-          $("#albumContainer").html(
-            '<p class="text-muted">No Album found.</p>'
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching albums:", error);
-        $("#albumContainer").html(
-          '<p class="text-danger">Failed to load albums.</p>'
-        );
-            if (err.response.status == 404) {
-          window.location.href = "/admin/error-404";
-        } else {
-          window.location.href = "/admin/error-500";
-        }
+        $("#albumContainer").append(cardHTML);
+      });
+      if (!uniqueAlbums.length) {
+        $("#albumContainer").html('<p class="text-muted">No Album found.</p>');
+      }
+    } catch (error) {
+      console.error("Error fetching albums:", error);
+      $("#albumContainer").html(
+        '<p class="text-danger">Failed to load albums.</p>'
+      );
+      if (err.response.status == 404) {
+        window.location.href = "/admin/error-404";
+      } else {
+        window.location.href = "/admin/error-500";
       }
     }
+  }
 
-    // Call on page load
-    $(document).ready(() => {
-      fetchAlbums();
-    });
-  </script>
-</div>
+  // Call on page load
+  $(document).ready(() => {
+    fetchAlbums();
+  });
+</script>

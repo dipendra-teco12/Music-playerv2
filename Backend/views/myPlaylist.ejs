@@ -25,33 +25,28 @@
   </div>
   <div class="card card-success">
     <div class="card-body">
-      <div class="row" id="playlistContainer">
-     
-      </div>
+      <div class="row" id="playlistContainer"></div>
     </div>
   </div>
-  </div>
-  
+</div>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  async function fetchPlaylists() {
+    try {
+      const response = await axios.get("/admin/my-playlists");
+      // console.log("Fetched playlists:", response.data);
 
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script>
-    async function fetchPlaylists() {
-      try {
-        const response = await axios.get("/admin/my-playlists");
-        // console.log("Fetched playlists:", response.data);
+      const { uniquePlaylists } = response.data;
 
-        const { uniquePlaylists } = response.data; 
+      $("#playlistContainer").empty();
 
-        $("#playlistContainer").empty();
+      uniquePlaylists.forEach((playlist) => {
+        const imageUrl = playlist.coverImage?.trim()
+          ? playlist.coverImage
+          : "https://res.cloudinary.com/dfciwmday/image/upload/v1754543097/MusicApp/Defaults/songImage_uxtvvy.jpg";
 
-        uniquePlaylists.forEach((playlist) => {
-      
-          const imageUrl = playlist.coverImage?.trim()
-            ? playlist.coverImage
-            : "https://res.cloudinary.com/dfciwmday/image/upload/v1752753992/MusicApp/defaults/songImage_scnkvu.jpg";
-
-          const cardHTML = `
+        const cardHTML = `
           <div class="col-md-12 col-lg-6 col-xl-4">
             <a href="/admin/myPlaylists/songs?playlistId=${playlist._id}"
                style="text-decoration: none;">
@@ -69,28 +64,26 @@
           </div>
         `;
 
-          $("#playlistContainer").append(cardHTML);
-        });
+        $("#playlistContainer").append(cardHTML);
+      });
 
-
-        if (!uniquePlaylists.length) {
-          $("#playlistContainer").html(
-            '<p class="text-muted">No playlists found.</p>'
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching playlists:", error);
+      if (!uniquePlaylists.length) {
         $("#playlistContainer").html(
-          '<p class="text-danger">Failed to load playlists.</p>'
+          '<p class="text-muted">No playlists found.</p>'
         );
-            if (err.response.status == 404) {
-          window.location.href = "/admin/error-404";
-        } else {
-          window.location.href = "/admin/error-500";
-        }
+      }
+    } catch (error) {
+      console.error("Error fetching playlists:", error);
+      $("#playlistContainer").html(
+        '<p class="text-danger">Failed to load playlists.</p>'
+      );
+      if (err.response.status == 404) {
+        window.location.href = "/admin/error-404";
+      } else {
+        window.location.href = "/admin/error-500";
       }
     }
+  }
 
-    $(document).ready(fetchPlaylists);
-  </script>
-</div>
+  $(document).ready(fetchPlaylists);
+</script>

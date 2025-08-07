@@ -139,26 +139,132 @@
 
     <script>
       let modalCallback = null;
+      let modalCancelCallback = null;
 
       function showModal({
         title = "Confirm",
         message = "",
         confirmText = "OK",
+        showCancel = true,
         onConfirm = null,
+        onCancel = null,
       }) {
-        $("#globalModalLabel").text(title);
-        $("#globalModalBody").html(message);
-        $("#globalModalConfirmBtn").text(confirmText);
-        modalCallback = onConfirm;
-        $("#globalModal").modal("show");
+        console.log("showModal called with:", {
+          title,
+          message,
+          confirmText,
+          showCancel,
+        });
+
+        try {
+          // Set modal content
+          $("#globalModalLabel").text(title);
+          $("#globalModalBody").html(message);
+          $("#globalModalConfirmBtn").text(confirmText);
+
+          // Store callbacks
+          modalCallback = onConfirm;
+          modalCancelCallback = onCancel;
+
+          // Show/hide cancel button based on showCancel parameter
+          if (showCancel === false) {
+            $(".modal-footer .btn-danger").hide();
+          } else {
+            $(".modal-footer .btn-danger").show();
+          }
+
+          // Show the modal
+          $("#globalModal").modal("show");
+
+          console.log("Modal should now be visible");
+
+          // Check if modal is actually visible after a short delay
+          setTimeout(() => {
+            if ($("#globalModal").hasClass("show")) {
+              console.log("Modal is now visible");
+            } else {
+              console.log("Modal is NOT visible - there might be an issue");
+            }
+          }, 500);
+        } catch (error) {
+          console.error("Error in showModal:", error);
+          // Fallback to alert if modal fails
+          if (confirm(message)) {
+            if (typeof modalCallback === "function") {
+              modalCallback();
+            }
+          } else {
+            if (typeof modalCancelCallback === "function") {
+              modalCancelCallback();
+            }
+          }
+        }
       }
 
+      // Handle confirm button click
       $("#globalModalConfirmBtn").on("click", function () {
+        console.log("Confirm button clicked");
         $("#globalModal").modal("hide");
-        if (typeof modalCallback === "function") {
-          modalCallback();
-        }
+
+        // Execute confirm callback after a small delay to ensure modal is hidden
+        setTimeout(() => {
+          if (typeof modalCallback === "function") {
+            console.log("Executing confirm callback");
+            modalCallback();
+          }
+          // Reset callbacks
+          modalCallback = null;
+          modalCancelCallback = null;
+        }, 100);
       });
+
+      // Handle cancel button click
+      $(document).on("click", ".modal-footer .btn-danger", function () {
+        console.log("Cancel button clicked");
+        $("#globalModal").modal("hide");
+
+        setTimeout(() => {
+          if (typeof modalCancelCallback === "function") {
+            console.log("Executing cancel callback");
+            modalCancelCallback();
+          }
+          // Reset callbacks
+          modalCallback = null;
+          modalCancelCallback = null;
+        }, 100);
+      });
+
+      // Handle when modal is closed without clicking any button (ESC key, clicking outside, etc.)
+      $("#globalModal").on("hidden.bs.modal", function () {
+        console.log("Modal hidden");
+        // Reset callbacks when modal is hidden
+        modalCallback = null;
+        modalCancelCallback = null;
+      });
+
+      // Debug: Log when DOM is ready
+      $(document).ready(function () {
+        // console.log(
+        //   "Document ready, showModal function available:",
+        //   typeof showModal
+        // );
+        // console.log("jQuery version:", $.fn.jquery);
+        // console.log("Bootstrap modal available:", typeof $.fn.modal);
+        // Test if modal element exists
+        // if ($("#globalModal").length > 0) {
+        //   console.log("Modal element found in DOM");
+        // } else {
+        //   console.error("Modal element #globalModal NOT found in DOM!");
+        // }
+      });
+
+      // Additional debugging - log when window loads
+      // $(window).on("load", function () {
+      //   console.log(
+      //     "Window loaded, showModal still available:",
+      //     typeof showModal
+      //   );
+      // });
     </script>
   </body>
 </html>
