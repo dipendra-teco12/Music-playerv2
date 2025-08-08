@@ -82,7 +82,7 @@
       });
     } catch (error) {
       console.error("Error fetching artist albums:", error);
-      $("#albumContainer").html(
+      $("#albumContainer").html(  
         '<p class="text-danger">Failed to load albums.</p>'
       );
       if (error.response.status == 404) {

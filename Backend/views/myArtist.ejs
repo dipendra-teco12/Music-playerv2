@@ -24,7 +24,7 @@
     </div>
   </div>
 
-  <div class="card card-success">
+  <div class="card-success">
     <div class="card-body">
       <div class="row" id="artistContainer">
         <!-- Dynamic artist cards will be appended here -->
@@ -55,9 +55,7 @@
 
         const cardHTML = `
           <div class="col-md-12 col-lg-6 col-xl-3">
-            <a href="/admin/myArtists/albums?artistId=${
-              artist._id
-            }" style="text-decoration: none;">
+            <a href="/admin/myArtists/albums?artistId=${artist._id}" style="text-decoration: none;">
               <div class="card mb-2 bg-gradient-dark">
                 <img class="card-img-top"
                      src="${imageUrl}"
@@ -65,10 +63,7 @@
                      onerror="this.onerror=null; this.src='https://res.cloudinary.com/dfciwmday/image/upload/v1752753992/MusicApp/defaults/songImage_scnkvu.jpg';" />
                 <div class="card-img-overlay d-flex flex-column justify-content-end">
                   <h5 class="card-title text-white">${artist.artistName}</h5>
-                  <p class="card-text text-white pb-2 pt-1">
-                    Albums: ${artist.artistAlbum?.length || 0}<br />
-                    Songs: ${artist.artistSong?.length || 0}
-                  </p>
+                
                 </div>
               </div>
             </a>
@@ -77,6 +72,12 @@
 
         $("#artistContainer").append(cardHTML);
       });
+
+      // <p class="card-text text-white pb-2 pt-1"> this code is belongs to above table after h5 tag you can put there
+      //   Albums: ${artist.artistAlbum?.length || 0}
+      //   <br />
+      //   // Songs: ${artist.artistSong?.length || 0}
+      // </p>;
       if (!uniqueArtists.length) {
         $("#artistContainer").html(
           '<p class="text-muted">No artist found.</p>'

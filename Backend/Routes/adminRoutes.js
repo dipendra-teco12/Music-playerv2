@@ -217,7 +217,7 @@ router.get("/error-404", (req, res) =>
   })
 );
 
-router.get("/error-403", (req, res) => res.render("403", { layout: false }));
+router.get("/403", (req, res) => res.render("403", { layout: false }));
 
 router.post("/save-privacy", authenticateToken, privacyPolicy);
 

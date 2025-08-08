@@ -1,6 +1,6 @@
 <div class="content-header">
   <div class="container-fluid">
-    <div class="row mb-2">
+    <div class="row mb-4">
       <div class="col-sm-6">
         <h1 class="m-0">Album details</h1>
       </div>
@@ -35,7 +35,7 @@
       }
     </style>
 
-    <form id="uploadForm" enctype="multipart/form-data" novalidate >
+    <form id="uploadForm" class="card" enctype="multipart/form-data" novalidate >
       <div class="card-body">
         <div class="row">
           <div class="col-sm-6">
@@ -584,35 +584,35 @@ $(document).ready(function () {
         withCredentials: true,
       });
       
-      console.log("Success response received:", res);
-      console.log("showModal function available:", typeof showModal);
+      // console.log("Success response received:", res);
+      // console.log("showModal function available:", typeof showModal);
       
       const successMessage = mode === "edit" ? "Album updated successfully!" : "Album uploaded successfully!";
       
       // Wait a bit to ensure all scripts are loaded, then try to show modal
       setTimeout(() => {
-        console.log("Attempting to show success modal...");
+        // console.log("Attempting to show success modal...");
         
         if (typeof showModal === "function") {
-          console.log("Using global showModal function");
+          // console.log("Using global showModal function");
           try {
             showModal({
               title: "Album Details",
               message: successMessage,
-              confirmText: "OK",
+              confirmText: "CLOSE",
               showCancel: false,
               onConfirm: () => {
-                console.log("Success modal confirmed");
+                // console.log("Success modal confirmed");
                 if (mode === "edit") {
-                  console.log("Redirecting to dashboard...");
+                  // console.log("Redirecting to dashboard...");
                   window.location.href = "/admin/dashboard";
                 } else {
-                  console.log("Resetting form...");
+                  // console.log("Resetting form...");
                   resetForm();
                 }
               },
               onCancel: () => {
-                console.log("Success modal cancelled (should not happen)");
+                // console.log("Success modal cancelled (should not happen)");
                 if (mode === "edit") {
                   window.location.href = "/admin/dashboard";
                 } else {
@@ -620,7 +620,7 @@ $(document).ready(function () {
                 }
               }
             });
-            console.log("showModal called successfully");
+            // console.log("showModal called successfully");
           } catch (modalError) {
             console.error("Error calling showModal:", modalError);
             alert(successMessage);
@@ -630,43 +630,8 @@ $(document).ready(function () {
               resetForm();
             }
           }
-        } else if (typeof window.showModal === "function") {
-          console.log("Using window.showModal function");
-          try {
-            window.showModal({
-              title: "Success",
-              message: successMessage,
-              confirmText: "OK",
-              showCancel: false,
-              onConfirm: () => {
-                console.log("Success modal confirmed");
-                if (mode === "edit") {
-                  window.location.href = "/admin/dashboard";
-                } else {
-                  resetForm();
-                }
-              },
-              onCancel: () => {
-                console.log("Success modal cancelled");
-                if (mode === "edit") {
-                  window.location.href = "/admin/dashboard";
-                } else {
-                  resetForm();
-                }
-              }
-            });
-            console.log("window.showModal called successfully");
-          } catch (modalError) {
-            console.error("Error calling window.showModal:", modalError);
-            alert(successMessage);
-            if (mode === "edit") {
-              window.location.href = "/admin/dashboard";
-            } else {
-              resetForm();
-            }
-          }
         } else {
-          console.log("No modal function found, using alert");
+          // console.log("No modal function found, using alert");
           alert(successMessage);
           if (mode === "edit") {
             window.location.href = "/admin/dashboard";
@@ -680,7 +645,7 @@ $(document).ready(function () {
       console.error("Request failed:", err);
       const msg = err.response?.data?.message || (mode === "edit" ? "Update failed" : "Upload failed");
       
-      console.log("Showing error modal");
+      // console.log("Showing error modal");
       
       setTimeout(() => {
         if (typeof showModal === "function") {
@@ -691,11 +656,11 @@ $(document).ready(function () {
               confirmText: "OK",
               showCancel: false,
               onConfirm: () => {
-                console.log("Error modal confirmed, resetting button");
+                // console.log("Error modal confirmed, resetting button");
                 $btn.prop("disabled", false).text(mode === "edit" ? "Update" : "Upload");
               },
               onCancel: () => {
-                console.log("Error modal cancelled");
+                // console.log("Error modal cancelled");
                 $btn.prop("disabled", false).text(mode === "edit" ? "Update" : "Upload");
               }
             });
@@ -704,28 +669,7 @@ $(document).ready(function () {
             alert(msg);
             $btn.prop("disabled", false).text(mode === "edit" ? "Update" : "Upload");
           }
-        } else if (typeof window.showModal === "function") {
-          try {
-            window.showModal({
-              title: "Error",
-              message: msg,
-              confirmText: "OK",
-              showCancel: false,
-              onConfirm: () => {
-                console.log("Error modal confirmed, resetting button");
-                $btn.prop("disabled", false).text(mode === "edit" ? "Update" : "Upload");
-              },
-              onCancel: () => {
-                console.log("Error modal cancelled");
-                $btn.prop("disabled", false).text(mode === "edit" ? "Update" : "Upload");
-              }
-            });
-          } catch (modalError) {
-            console.error("Error showing window error modal:", modalError);
-            alert(msg);
-            $btn.prop("disabled", false).text(mode === "edit" ? "Update" : "Upload");
-          }
-        } else {
+        }else {
           alert(msg);
           $btn.prop("disabled", false).text(mode === "edit" ? "Update" : "Upload");
         }

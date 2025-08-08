@@ -149,12 +149,12 @@
         onConfirm = null,
         onCancel = null,
       }) {
-        console.log("showModal called with:", {
-          title,
-          message,
-          confirmText,
-          showCancel,
-        });
+        // console.log("showModal called with:", {
+        //   title,
+        //   message,
+        //   confirmText,
+        //   showCancel,
+        // });
 
         try {
           // Set modal content
@@ -176,7 +176,7 @@
           // Show the modal
           $("#globalModal").modal("show");
 
-          console.log("Modal should now be visible");
+          // console.log("Modal should now be visible");
 
           // Check if modal is actually visible after a short delay
           setTimeout(() => {
@@ -203,13 +203,13 @@
 
       // Handle confirm button click
       $("#globalModalConfirmBtn").on("click", function () {
-        console.log("Confirm button clicked");
+        // console.log("Confirm button clicked");
         $("#globalModal").modal("hide");
 
         // Execute confirm callback after a small delay to ensure modal is hidden
         setTimeout(() => {
           if (typeof modalCallback === "function") {
-            console.log("Executing confirm callback");
+            // console.log("Executing confirm callback");
             modalCallback();
           }
           // Reset callbacks
@@ -220,7 +220,7 @@
 
       // Handle cancel button click
       $(document).on("click", ".modal-footer .btn-danger", function () {
-        console.log("Cancel button clicked");
+        // console.log("Cancel button clicked");
         $("#globalModal").modal("hide");
 
         setTimeout(() => {
@@ -236,14 +236,14 @@
 
       // Handle when modal is closed without clicking any button (ESC key, clicking outside, etc.)
       $("#globalModal").on("hidden.bs.modal", function () {
-        console.log("Modal hidden");
+        // console.log("Modal hidden");
         // Reset callbacks when modal is hidden
         modalCallback = null;
         modalCancelCallback = null;
       });
 
       // Debug: Log when DOM is ready
-      $(document).ready(function () {
+      // $(document).ready(function () {
         // console.log(
         //   "Document ready, showModal function available:",
         //   typeof showModal
@@ -256,7 +256,7 @@
         // } else {
         //   console.error("Modal element #globalModal NOT found in DOM!");
         // }
-      });
+      // });
 
       // Additional debugging - log when window loads
       // $(window).on("load", function () {

@@ -38,7 +38,7 @@
   </div>
 </div>
 
-<div class="" id="updateProfileForm">
+<div class="card" id="updateProfileForm">
   <div class="card-body">
     <form id="updateForm" novalidate>
       <!-- Full Name and Email in one row -->
@@ -186,7 +186,7 @@
                 message: response.message || "Profile updated successfully!",
                 confirmText: "OK",
               });
-              setTimeout(() => location.reload(), 1500);
+              setTimeout(() => location.reload(), 150);
             },
             error: function (xhr, status, error) {
               console.error("Error:", error);

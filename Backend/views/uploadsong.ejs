@@ -36,7 +36,7 @@
     }
   </style>
 
-  <form id="uploadForm" enctype="multipart/form-data" novalidate>
+  <form id="uploadForm" class="card" enctype="multipart/form-data" novalidate>
     <div class="card-body">
       <!-- Song Title -->
       <div class="row">
@@ -410,8 +410,8 @@ $(document).ready(function () {
           valid = false;
         }
         // Check file size (100MB limit, or whatever your backend allows)
-        if (vf.size > 100 * 1024 * 1024) {
-          setError("videoFile", "Video file size must not exceed 100MB.");
+        if (vf.size > 50* 1024 * 1024) {
+          setError("videoFile", "Video file size must not exceed 50MB.");
           valid = false;
         }
 
@@ -610,9 +610,9 @@ try {
     withCredentials: true,
   });
   
-  console.log("Success response received:", res);
-  console.log("showModal function available:", typeof showModal);
-  console.log("Window showModal available:", typeof window.showModal);
+  // console.log("Success response received:", res);
+  // console.log("showModal function available:", typeof showModal);
+  // console.log("Window showModal available:", typeof window.showModal);
   
   const successMessage = mode === "edit" ? "Song updated successfully!" : "Song uploaded successfully!";
   
@@ -626,7 +626,7 @@ try {
         showModal({
           title: "Song Details",
           message: successMessage,
-          confirmText: "OK",
+          confirmText: "CLOSE",
           showCancel: false,
           onConfirm: () => {
             console.log("Success modal confirmed, redirecting...");
@@ -652,22 +652,22 @@ try {
           confirmText: "OK",
           showCancel: false,
           onConfirm: () => {
-            console.log("Success modal confirmed, redirecting...");
+            // console.log("Success modal confirmed, redirecting...");
             window.location.href = "/admin/dashboard";
           },
           onCancel: () => {
-            console.log("Success modal cancelled (should not happen)");
+            // console.log("Success modal cancelled (should not happen)");
             window.location.href = "/admin/dashboard";
           }
         });
-        console.log("window.showModal called successfully");
+        // console.log("window.showModal called successfully");
       } catch (modalError) {
         console.error("Error calling window.showModal:", modalError);
         alert(successMessage);
         window.location.href = "/admin/dashboard";
       }
     } else {
-      console.log("No modal function found, using alert");
+      // console.log("No modal function found, using alert");
       alert(successMessage);
       window.location.href = "/admin/dashboard";
     }
